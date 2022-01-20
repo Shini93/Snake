@@ -17,6 +17,7 @@ class Snake {
   int startLength = 20;
   int SLength = startLength;
   boolean dead = false;
+  int count = 0;
   /***************************************
    *Constructor
    ***************************************/
@@ -42,8 +43,8 @@ class Snake {
    ***************************************/
   void nextTile() {
     Angle = Anglecalc(pos[0][0],pos[0][1],mouseX,mouseY);
-    newpos[0] = (pos[0][0]+FieldSize*cos(Angle));
-    newpos[1] = (pos[0][1]-FieldSize*sin(Angle));
+    newpos[0] = (pos[0][0]+FieldSize*sin(Angle));
+    newpos[1] = (pos[0][1]-FieldSize*cos(Angle));
   }
 
   /***************************************

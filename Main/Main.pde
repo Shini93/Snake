@@ -48,7 +48,22 @@ void draw() {
  ********************/
 void mousePressed() {
   missilealive = true;
-  missile = new Missiles(5, snake.pos[0][0], snake.pos[0][1]);    //adds missile starting from the snake
+  float dAngle;
+  float Angle;
+  float min=2*PI;
+  int id=0;
+  for(Blocks b : blocks){
+    Angle = Anglecalc(snake.pos[0][0],snake.pos[0][1],b.pos[0]+b.size/2,b.pos[1]+b.size/2);
+    stroke(#000000);
+    line(snake.pos[0][0],snake.pos[0][1],snake.pos[0][0]+1000*sin(Angle),snake.pos[0][1]-1000*cos(Angle));
+    dAngle = abs(Angle - snake.Angle);
+    if(dAngle<min){
+      min = dAngle;
+      id = b.id; 
+    }
+  }
+
+  missile = new Missiles(id, snake.pos[0][0], snake.pos[0][1]);    //adds missile starting from the snake
 }
 
 /**********************************
@@ -98,7 +113,6 @@ void DrawPath() {
         fill(#FFFFFF, path[i].fade);
         circle(path[i].pos[0], path[i].pos[1], path[i].size);
         path[i].update();
-        print(i+"  "+path[i].alive+"\n");
       }
     }
   }
@@ -114,9 +128,16 @@ void DrawBlocks(){
 *Calculates between mouse and Snakehead
 ***************************************/
 float Anglecalc(float x, float y, float x2, float y2) {    //Angle between mouse and Snake
-  float dx = x-x2;
+  float dx = -x+x2;
   float dy = y-y2;
-  float Angle = 2*atan(dy/sqrt(dx*dx+dy*dy));
+  float Angle;
+  float d=sqrt(dx*dx+dy*dy);
+  Angle = acos(dy/d);
+  if(dx < 0)
+    Angle = 2*PI-Angle;
+  //print(Angle+ "    "+snake.pos[0][0]+  "      "+ mouseX+"\n");
+  
+/*  float Angle = 2*atan(dy/sqrt(dx*dx+dy*dy));
   if (dx<0 && dy<0)    //2. quadrant
     Angle = 2*PI+Angle;
   if (dx<0 && dy>=0)    //1. quadrant
@@ -126,5 +147,6 @@ float Anglecalc(float x, float y, float x2, float y2) {    //Angle between mouse
     Angle = PI-Angle;
   if (dx>=0 && dy>=0)    //4. quadrant
     Angle = PI-Angle;
+    */
   return Angle;
 }
