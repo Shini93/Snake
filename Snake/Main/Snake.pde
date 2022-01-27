@@ -8,10 +8,10 @@ class Snake {
   float Angle = PI/2; //Angle of moving
   float oldAngle;  //Angle from one iteration before
   byte size = 10;  //startsize of the Snake
-  color colour = color(#00FFFF);  //Colour of the Snake
   float FieldSize = 7;            //Startsize of each Snakesegment
   int MaxLength = 1000;          //maximum length of snake
   int pos[][] = new int [MaxLength][2]; //  [Head][x,y]
+  color colour = #00FFFF;  //Colour of the Snake
   int newpos[] = new int[2];
   int startLength = 20;
   int SLength = startLength;
@@ -22,10 +22,16 @@ class Snake {
    *Constructor
    ***************************************/
   Snake() {
-    pos[0][0] = width/2;
-    pos[0][1] = height/100;
+    pos[0][0] = 150;
+    pos[0][1] = 150;
   }
 
+  /*****************************************
+   *Returns colour of Snakebody on given pos
+   *****************************************/
+  color BodyColour(int bodypart){
+    return color(bodypart*25/SLength,bodypart*255/SLength,bodypart*255/SLength); 
+  }
   /***************************************
    *Moves the Snake
    ***************************************/
@@ -55,7 +61,8 @@ class Snake {
     testFood();
     testSnake();
     testBlocks();    
-    testPortal();  
+    if(lvl.setPortal)
+      testPortal();  
     testWalls();
   }
 
@@ -81,12 +88,12 @@ class Snake {
   
   void testFood(){
    //TestFood
-    for (int i=0; i<maxFood; i++) {
+    for (int i=0; i<lvl.maxFood; i++) {
       float distance = 999;
-      distance = sqrt((food[i].posx-newpos[0])*(food[i].posx-newpos[0])+(food[i].posy-newpos[1])*(food[i].posy-newpos[1]));
-      if (distance < (food[i].size+size)/2) {
-        SLength+=food[i].value;
-        food[i].reset();
+      distance = sqrt((food.get(i).posx-newpos[0])*(food.get(i).posx-newpos[0])+(food.get(i).posy-newpos[1])*(food.get(i).posy-newpos[1]));
+      if (distance < (food.get(i).size+size)/2) {
+        SLength+=food.get(i).value;
+        food.get(i).reset();
       }
     } 
   }
@@ -103,8 +110,8 @@ class Snake {
   }
   void testBlocks(){
    //testBlocks
-    for(Blocks b : blocks){
-        if(newpos[0]+size/2>=b.pos[0] && newpos[0]-size/2 <= b.pos[0] + b.size && newpos[1]+size/2>=b.pos[1] && newpos[1] -size/2 <= b.pos[1] + b.size){
+    for(int i=0;i<lvl.blocksize/2-1;i++){
+        if(newpos[0]+size/2>=blocks.get(i).pos[0] && newpos[0]-size/2 <= blocks.get(i).pos[0] + blocks.get(i).size && newpos[1]+size/2>=blocks.get(i).pos[1] && newpos[1] -size/2 <= blocks.get(i).pos[1] + blocks.get(i).size){
         dead = true;
       }
     } 
@@ -138,15 +145,15 @@ class Snake {
   void testPortal(){
   //testPortal
     if(portaltime > 20){
-      for(Portal p : portal){
+      for(byte k=0;k<MaxPortals;k++){
         float[] distance = new float[2];
         boolean teleported = false;
         for(int i=0;i<2;i++){
           if(teleported==false){
-            distance[i] = abs(distance(p.pos[i][0], p.pos[i][1],newpos[0],newpos[1]));
-            if (distance[i] < (size+p.size*sqrt(2))/2 ) {
-              if(newpos[0]+size/2 > p.pos[i][0]-p.size/4 && newpos[0]-size/2 <= p.pos[i][0]+p.size/4 && newpos[1]+size/2 > p.pos[i][1]-p.size/2 && newpos[1]-size/2 <= p.pos[i][1]+p.size/2){
-                teleport(p.pos[1-i][0],p.pos[1-i][1]);
+            distance[i] = abs(distance(portal[k].pos[i][0], portal[k].pos[i][1],newpos[0],newpos[1]));
+            if (distance[i] < (size+portal[k].size*sqrt(2))/2 ) {
+              if(newpos[0]+size/2 > portal[k].pos[i][0]-portal[k].size/4 && newpos[0]-size/2 <= portal[k].pos[i][0]+portal[k].size/4 && newpos[1]+size/2 > portal[k].pos[i][1]-portal[k].size/2 && newpos[1]-size/2 <= portal[k].pos[i][1]+portal[k].size/2){
+                teleport(portal[k].pos[1-i][0],portal[k].pos[1-i][1]);
                 portaltime = 0;
                 teleported = true;
               }

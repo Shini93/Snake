@@ -2,33 +2,31 @@
 *Global variables
 *ToDO: Add special after x runs through portal
 *********************************/
-byte maxFood = 100;
-byte GameSpeed = 20;
-byte MaxPortals = 3;
-byte BlockSize = 30;
-Food[] food = new Food[maxFood];
-Level lvl = new Level();
-Snake snake = new Snake();
-Missiles missile;
-boolean missilealive = false;
-MissilePath [] path = new MissilePath [100];
-Blocks[] blocks = new Blocks[lvl.maxBlocks];
-Portal[] portal = new Portal[MaxPortals];
+byte GameSpeed = 20;            //sets fps
+byte BlockSize = 30;            //Size of all blocks
+//int maxBlocks = 1000;
+byte MaxPortals = 3;            //Maximum Portals in the game
+byte maxSnakes = 1;
+boolean missilealive = false;   //No Kaboom anymore
+ArrayList<Food> food = new ArrayList <Food>();  //Spawns Food
+Snake snake = new Snake();      //Snek
+Missiles missile;               //Kaboom!
+MissilePath [] path = new MissilePath [100];  //creates missilepath
+ArrayList <Blocks> blocks = new ArrayList <Blocks>();
+//Blocks[] blocks = new Blocks[1000];  //creates Blocks  //TODO: cannot load more blocks fir diff. lvls, eiter use max. block count here, or use arraylist
+Portal[] portal = new Portal[MaxPortals];  //creates Portal Array, filled in in lvl file.
+Level lvl = new Level();        //has all the lvls in it
+lvlHandler lvls = new lvlHandler();
 /*************************************
  *Initialises program
  *************************************/
- 
-void setup() {
-  size(800, 800);
-  int k=0;
-  path[0] = new MissilePath();
-  missile = new Missiles();
 
- // for (int i=0; i<lvl.maxBlocks;i++)
-   // blocks[i] = new Blocks(i,2,3);
-  lvl.callBlocks(byte(1));
-  for(byte i=0;i<MaxPortals;i++)
-    portal[i] = new Portal();
+void setup() {
+  size(800, 800);                          //starting size of the game
+  path[0] = new MissilePath();             
+  missile = new Missiles();
+  lvls.start();
+  missilealive = false;   //No Kaboom anymore
   snake = new Snake();
   frameRate(GameSpeed);
 }
@@ -38,6 +36,7 @@ void setup() {
  *opens every GameSpeed interval
  ***********************************/
 void draw() {
+  lvls.victory();
   background(125);
   DrawFood();
   DrawSnake();
@@ -45,6 +44,7 @@ void draw() {
   DrawPath();
   DrawBlocks();
   DrawPortal();
+  DrawText();
 }
 
 /********************
@@ -57,12 +57,12 @@ void mousePressed() {
   float Angle;
   float min=2*PI;
   int id=0;
-  for(Blocks b : blocks){
-    Angle = Anglecalc(snake.pos[0][0],snake.pos[0][1],b.pos[0]+b.size/2,b.pos[1]+b.size/2);
+  for(int i=0;i<blocks.size()-1;i++){
+    Angle = Anglecalc(snake.pos[0][0],snake.pos[0][1],blocks.get(i).pos[0]+blocks.get(i).size/2,blocks.get(i).pos[1]+blocks.get(i).size/2);
     dAngle = abs(Angle - snake.Angle);
     if(dAngle<min){
       min = dAngle;
-      id = b.id; 
+      id = blocks.get(i).id; 
     }
   }
   missile = new Missiles(id, snake.pos[0][0], snake.pos[0][1]);    //adds missile starting from the snake
@@ -73,10 +73,10 @@ void mousePressed() {
  **********************************/
 void DrawSnake() {
   if(snake.dead==true)
-    snake = new Snake();
+    lvls.reset();
   snake.move();
   for (int i=0; i<snake.SLength; i++) {
-    fill(snake.colour);
+    fill(snake.BodyColour(i));
     stroke(#000000);
     circle(snake.pos[i][0], snake.pos[i][1], snake.size);
   }
@@ -86,26 +86,28 @@ void DrawSnake() {
  *Draws the Portal(s)
  **********************************/
 void DrawPortal(){
-  for(Portal p : portal){
-    strokeWeight(3);
-    stroke(p.colour1);
-    fill(#D8FFF8);
-    ellipse(p.pos[0][0],p.pos[0][1],p.size*0.5,p.size);
-    stroke(p.colour2);
-    fill(#FFE815);
-    ellipse(p.pos[1][0],p.pos[1][1],p.size*0.5,p.size);
+  if(lvl.setPortal){
+    for(byte i=0;i<MaxPortals;i++){
+        strokeWeight(3);
+        stroke(portal[i].colour1);
+        fill(#D8FFF8);
+        ellipse(portal[i].pos[0][0],portal[i].pos[0][1],portal[i].size*0.5,portal[i].size);
+        stroke(portal[i].colour2);
+        fill(#FFE815);
+        ellipse(portal[i].pos[1][0],portal[i].pos[1][1],portal[i].size*0.5,portal[i].size);
+    }
+    strokeWeight(1);
   }
-  strokeWeight(1);
 }
 
 /**********************************
  *Draws Food and other lvl ups
  **********************************/
 void DrawFood() {
-  for (int i=0; i<maxFood; i++) {
-    fill(food[i].BGcolour);
-    stroke(food[i].colour);
-    ellipse(food[i].posx, food[i].posy, food[i].size, food[i].size);
+  for (int i=0; i<lvl.maxFood; i++) {
+    fill(food.get(i).BGcolour);
+    stroke(food.get(i).colour);
+    ellipse(food.get(i).posx, food.get(i).posy, food.get(i).size, food.get(i).size);
   }
 }
 
@@ -137,12 +139,19 @@ void DrawPath() {
 }
 
 void DrawBlocks(){
- for(Blocks b : blocks){
-   fill(b.colour);
-   rect(b.pos[0],b.pos[1],b.size,b.size);
+ for(int i=0;i<lvl.blocksize/2;i++){
+   fill(blocks.get(i).colour);
+   rect(blocks.get(i).pos[0],blocks.get(i).pos[1],blocks.get(i).size,blocks.get(i).size);
  } 
 }
 
+void DrawText(){
+ textSize(30);
+ fill(0);
+ text("Snake Size: "+snake.SLength + "\nposx" +snake.pos[0][0] +"\nposy"+snake.pos[0][1] +"\nAngle "+snake.Angle*180/PI + "\nDead: "+lvls.Killcount,0,30);
+ 
+  
+}
 /***************************************
 *Calculates between mouse and Snakehead
 ***************************************/

@@ -61,7 +61,7 @@ class Food {
     } else {
       size = 15;
       BGcolour = color(#FFFF00);
-      value = 0;
+      value = 100;
     }
   }
 }

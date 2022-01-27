@@ -5,8 +5,11 @@ class Blocks{
   int id;
   
   Blocks(int ida, int x, int y){
-    pos[0] = int(random(width));
-    pos[1] = int(random(height));
+    pos[0] = x;
+    pos[1] = y;
+    id = ida;
+  }
+  Blocks(int ida){
     id = ida;
   }
   
