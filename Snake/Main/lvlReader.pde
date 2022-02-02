@@ -3,7 +3,7 @@ class lvlReader{
    
  }
  
- int[][] readData(){
+  int[][] readData(){
   BufferedReader reader = createReader("../LVLTool/lvlTool/data/Lvl"+lvls.actualLevel+".txt");
   String line = null;
   String pieces = "";
@@ -13,8 +13,14 @@ class lvlReader{
       pieces += line;
     }
     boolean counterStart = false;
+    boolean SnakeFinish = false;
     for(int i=0;i<pieces.length();i++){
+      if(pieces.charAt(i)=='!' && SnakeFinish == false){      //starts with x seperated from ;
+        i++;
+        counterStart = true;
+      }
       if(pieces.charAt(i)=='~'){      //starts with x seperated from ;
+        SnakeFinish = true;
         i++;
         counterStart = true;
       }
@@ -24,7 +30,7 @@ class lvlReader{
             Number += pieces.charAt(i);
             i++;
         }
-        allPos.add(int(Number));
+        allPos.add(int(Number)); 
       }
     }
     
@@ -43,5 +49,19 @@ class lvlReader{
   }
   return BlockPos;
  }
+ 
+  byte getlatestLevel(){
+  // we'll have a look in the data folder
+  java.io.File folder = new java.io.File(dataPath("../../LVLTool/lvlTool/data/"));
+  
+  // list the files in the data folder
+  String[] filenames = folder.list();
+
+  // display the filenames
+  for (int i = 0; i < filenames.length; i++) {
+    println(filenames[i]);
+  }
+  return byte(filenames.length);
+}
  
 }

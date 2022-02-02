@@ -6,7 +6,7 @@ class lvlHandler{
     
   }
   void victory(){
-    if(snake.SLength>=25){
+    if(snake.SLength>=lvl.winsize){
        if(actualLevel < lvl.maxLvl){
          actualLevel++;
          reset();
@@ -14,7 +14,8 @@ class lvlHandler{
     }
   }
   void start(){
-    reader.readData();
+    lvl.maxLvl = reader.getlatestLevel();
+    //reader.readData();
     lvl.callBlocks(byte(actualLevel),reader.readData());                 //starts at lvl 1
   }
   void reset(){
@@ -28,9 +29,11 @@ class lvlHandler{
     portal = new Portal[MaxPortals];
     setup();
     Killcount++;
+    lvl.setPortal = false;
   }
   
   void setlvl(byte level){
     lvl.callBlocks(level,reader.readData());
   }
+  
 }

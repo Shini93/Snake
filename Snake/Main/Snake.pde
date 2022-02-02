@@ -22,8 +22,7 @@ class Snake {
    *Constructor
    ***************************************/
   Snake() {
-    pos[0][0] = 150;
-    pos[0][1] = 150;
+
   }
 
   /*****************************************
@@ -46,10 +45,17 @@ class Snake {
    *Finds out the next tile for the Head
    ***************************************/
   void nextTile() {
-    oldAngle = Angle;
+    
+    oldAngle = Anglecalc(pos[1][0],pos[1][1],pos[0][0],pos[0][1]);
+    //float Anglediff = min((2 * PI) - abs(Angle - oldAngle), abs(Angle - oldAngle));
     if(mouseX-pmouseX!=0 && mouseY-pmouseY!=0)  //snake moves always in the same direction
       Angle = Anglecalc(pos[0][0],pos[0][1],mouseX,mouseY);
-
+    //if(Angle<oldAngle)
+    //  Anglediff *=-1;
+    //stroke(3);
+    //line(pos[0][0],pos[0][1],pos[0][0]*(1+sin(oldAngle+Anglediff)),pos[0][1]*(1-cos(oldAngle+Anglediff)));
+    //stroke(#FF0000);
+    //line(pos[0][0],pos[0][1],pos[0][0]*(1+sin(Angle)),pos[0][1]*(1-cos(Angle)));
     newpos[0] = int(pos[0][0]+FieldSize*sin(Angle));
     newpos[1] = int(pos[0][1]-FieldSize*cos(Angle));
   }

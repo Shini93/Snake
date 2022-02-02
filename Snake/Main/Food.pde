@@ -12,7 +12,7 @@ class Food {
   int posy;
   int BGcolour;
   int colour = color(#FFFFFF);
-  int value;
+  int value;                     //How much a snake grows when eating it
 
   /********************************
    *Overloaded constructor
@@ -50,6 +50,7 @@ class Food {
   *defines the parameters
   **************************************/
   void init () {
+    colour = color(#FFFFFF);
     if (FoodKind == 0) {
       size = 5;
       BGcolour = color(#00FF00);
