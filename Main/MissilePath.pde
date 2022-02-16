@@ -1,15 +1,15 @@
 /**************************************
 *Handles the Missile Path
 *one pos per element
-*v
 **************************************/
 class MissilePath {
   byte size = 10;
-  float [] pos = new float [2];
+  int [] pos = new int [2];
   int fade = 255;
   byte id;
   byte alive = 10;
-  MissilePath(float x, float y, byte id) {
+  
+  MissilePath(int x, int y) {
     pos[0] = x;
     pos[1] = y;
     fade = 255;

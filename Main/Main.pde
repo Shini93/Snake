@@ -1,45 +1,82 @@
+/********************************* //<>//
+ *Global variables
+ *ToDO: Add special after x runs through portal
+ *********************************/
+byte GameSpeed = 20;            //sets fps
+byte BlockSize = 30;            //Size of all blocks
+byte MaxPortals = 3;            //Maximum Portals in the game
+byte maxSnakes = 1;             //not implemented yet
+boolean missilealive = false;   //No Kaboom anymore
+int maxRays = 720;              //Maximum number of Rays for the Raycasting
+int marginX = 200;
+int marginY = 100;
+int fadeBlocks = 20;
+int maxFood = 0;
+int maxLevel = 1;
+int[] colorSnake = new int[3];
+ArrayList<Food> food = new ArrayList <Food>();  //Spawns Food
+ArrayList <Blocks> blocks = new ArrayList <Blocks>();
+
+
+boolean counter = true;
+color testfarbe = 0;
+
+
+Portal[] portal = new Portal[MaxPortals];  //creates Portal Array, filled in in lvl file.
+MissilePath [] path = new MissilePath [100];  //creates missilepath
+Ray[] ray = new Ray[maxRays];
+
+Snake snake = new Snake();      //Snek
+Level lvl = new Level();        //has all the lvls in it
+lvlHandler lvls = new lvlHandler();  //Chanes levels as needed
+
+Missiles missile;               //Kaboom!
+
 /*************************************
  *Initialises program
  *************************************/
-void setup() {
-  size(800, 800);
-  int k=0;
-  snake = new Snake();
-  path[0] = new MissilePath();
+void SetupSnake(){
+  snake = new Snake(); //<>//
+  path[0] = new MissilePath(); //<>//
   missile = new Missiles();
-  for (int i=0; i<maxFood; i++) {
-    food[i] = new Food(i, k);
-    k=0;
-    if (i==3 || i==6)
-      k=1;
-  }
-  for (int i=0; i<10;i++)
-    blocks[i] = new Blocks(i);
-  frameRate(GameSpeed);
+  lvls.start();                            //starts the first level
+  missilealive = false;                    //No Kaboom anymore
+  
+  frameRate(GameSpeed);                    //sets the gamespeed to a 20 fps
+
+  /*initialises the Raycasting*/
+  for (int i=0; i<maxRays; i++) {
+    ray[i] = new Ray(snake.body.get(0).pos[0], snake.body.get(0).pos[1], i*PI/360);
+  }  //<>//
 }
 
-/*********************************
- *Global variables
- *********************************/
-byte maxFood = 100;
-byte GameSpeed = 20;
-Food[] food = new Food[maxFood];
-Snake snake = new Snake();
-Missiles missile;
-boolean missilealive = false;
-MissilePath [] path = new MissilePath [100];
-Blocks[] blocks = new Blocks[10];
 /**********************************
  *Draws the Canvas
  *opens every GameSpeed interval
  ***********************************/
 void draw() {
-  background(125);
+  if(shopmenu == true)
+    testfarbe = shopMenu(testfarbe);
+  if(GameStart == false)
+    return;
+  background(0);
+  lvls.victory();        //Checks if the level is finished
+  fill(0);
+  stroke(255);
+  rect(200,100,800,800);
+  push();
+  translate(200,100);
+  for (int i=0; i<maxRays; i++) {
+    ray[i].update();
+  }
   DrawFood();
   DrawSnake();
   DrawMissile();
   DrawPath();
   DrawBlocks();
+  DrawPortal();
+  DrawText();
+  pop();
 }
 
 /********************
@@ -48,35 +85,60 @@ void draw() {
  ********************/
 void mousePressed() {
   missilealive = true;
-  float dAngle;
+  float dAngle;      //Angle difference between the snake head and the block with the nearest Angle
   float Angle;
-  float min=2*PI;
+  float min=2*PI;    //minumum Angle between Snake and block
   int id=0;
-  for(Blocks b : blocks){
-    Angle = Anglecalc(snake.pos[0][0],snake.pos[0][1],b.pos[0]+b.size/2,b.pos[1]+b.size/2);
-    stroke(#000000);
-    line(snake.pos[0][0],snake.pos[0][1],snake.pos[0][0]+1000*sin(Angle),snake.pos[0][1]-1000*cos(Angle));
+  for (int i=0; i<blocks.size()-1; i++) {
+    Angle = Anglecalc(snake.body.get(0).pos[0], snake.body.get(0).pos[1], blocks.get(i).pos[0]+blocks.get(i).size/2, blocks.get(i).pos[1]+blocks.get(i).size/2);
     dAngle = abs(Angle - snake.Angle);
-    if(dAngle<min){
+    if (dAngle<min) {
       min = dAngle;
-      id = b.id; 
+      id = blocks.get(i).id;
     }
   }
-
-  missile = new Missiles(id, snake.pos[0][0], snake.pos[0][1]);    //adds missile starting from the snake
+  missile = new Missiles(id, snake.body.get(0).pos[0], snake.body.get(0).pos[1]);    //adds missile starting from the snake
 }
 
 /**********************************
  *Draws the Snake(s)
  **********************************/
 void DrawSnake() {
-  if(snake.dead==true)
-    snake = new Snake();
+  if (snake.dead==true)
+    lvls.reset();
   snake.move();
   for (int i=0; i<snake.SLength; i++) {
-    fill(snake.colour);
+    fill(snake.BodyColour(i),255);
     stroke(#000000);
-    circle(snake.pos[i][0], snake.pos[i][1], snake.size);
+    circle(snake.body.get(i).pos[0], snake.body.get(i).pos[1], snake.size);
+    fill(snake.BodyColour(i),40);
+    noStroke();
+    circle(snake.body.get(i).pos[0], snake.body.get(i).pos[1], snake.size+10);
+    stroke(1);
+  }
+}
+
+/**********************************
+ *Draws the Portal(s)
+ **********************************/
+void DrawPortal() {
+  if (lvl.setPortal) {
+    for (byte i=0; i<MaxPortals; i++) {      //repeat for every portal in existance
+      strokeWeight(3);
+      stroke(portal[i].colour1,30);
+      ellipse(portal[i].pos[0][0], portal[i].pos[0][1], portal[i].size*0.5+2, portal[i].size+4);
+      stroke(portal[i].colour1);
+      fill(#D8FFF8);
+      ellipse(portal[i].pos[0][0], portal[i].pos[0][1], portal[i].size*0.5, portal[i].size);
+      
+      stroke(portal[i].colour2,30);
+      ellipse(portal[i].pos[1][0], portal[i].pos[1][1], portal[i].size*0.5+2, portal[i].size+4);
+      stroke(portal[i].colour2);
+      fill(#FFE815);
+      ellipse(portal[i].pos[1][0], portal[i].pos[1][1], portal[i].size*0.5, portal[i].size);
+      
+    }
+    strokeWeight(1);
   }
 }
 
@@ -84,69 +146,119 @@ void DrawSnake() {
  *Draws Food and other lvl ups
  **********************************/
 void DrawFood() {
-  for (int i=0; i<maxFood; i++) {
-    fill(food[i].BGcolour);
-    stroke(food[i].colour);
-    ellipse(food[i].posx, food[i].posy, food[i].size, food[i].size);
+  for (int i=0; i<food.size(); i++) {
+    if (food.get(i).size == 30) {                //if food has no rays on it
+      drawGradient(food.get(i).posx, food.get(i).posy, food.get(i).size);    //draw a circle with blurry circumfence
+    } else {                                     //food is seen by the rays
+      fill(food.get(i).BGcolour);
+      stroke(food.get(i).colour);
+      ellipse(food.get(i).posx, food.get(i).posy, food.get(i).size, food.get(i).size);
+      food.get(i).colour = 0;                    //resets food to not seen every time
+      food.get(i).BGcolour = #00160D;
+      food.get(i).size = 30;
+    }
+  }
+}
+
+/**********************************
+*Draws the gradient of food
+***********************************/
+void drawGradient(float x, float y, int size) {
+  int radius = size;
+  float h = 255;                    //fades the circle out
+  for (int r = radius; r > 0; --r) {
+    noStroke();  
+    fill(max(50-h, 0), max(50-h, 9), max(255-h, 0), 5);
+    circle(x, y, r);
+    h-=10;
   }
 }
 
 /**************************************
-*Draws the Missile
-**************************************/
+ *Draws the Missile
+ **************************************/
 void DrawMissile() {
   if (missilealive == true) {
     missile.move();
     fill(#FF0000);
     circle(missile.pos[0], missile.pos[1], 3);
+    fill(#FFAAAA,50);
+    circle(missile.pos[0], missile.pos[1], 9);
   }
 }
 
 /**************************************
-*Draws the Path of the Missile
-**************************************/
+ *Draws the Path of the Missile
+ **************************************/
 void DrawPath() {
-  if (missile.alive!=0) {
-    path[missile.alive-1] = new MissilePath(missile.pos[0], missile.pos[1], byte(0));
-    for (int i=0; i<missile.alive-1; i++) {
-      if(path[i].alive >= 0){
-        fill(#FFFFFF, path[i].fade);
-        circle(path[i].pos[0], path[i].pos[1], path[i].size);
-        path[i].update();
-      }
+  if(missile.alive ==0)
+    return;
+  path[missile.alive-1] = new MissilePath(missile.pos[0], missile.pos[1]);
+  for (int i=0; i<missile.alive-1; i++) {
+    if (path[i].alive >= 0) {
+      fill(#FFFFFF, path[i].fade);
+      circle(path[i].pos[0], path[i].pos[1], path[i].size);
+      path[i].update();
     }
   }
 }
 
-void DrawBlocks(){
- for(Blocks b : blocks){
-   fill(b.colour);
-   rect(b.pos[0],b.pos[1],b.size,b.size);
- } 
+/**************************
+*Draws all blocks on screen
+**************************/
+void DrawBlocks() {
+  for (int i=0; i<lvl.blocksize/2-1; i++) {
+    if(blocks.get(i).RayCast == true){
+      noStroke();
+      fill(blocks.get(i).colour,50);
+      rect(blocks.get(i).pos[0]-3, blocks.get(i).pos[1]-3, blocks.get(i).size+6, blocks.get(i).size+6);
+    
+      stroke(1);
+      fill(blocks.get(i).colour);
+      rect(blocks.get(i).pos[0], blocks.get(i).pos[1], blocks.get(i).size, blocks.get(i).size);
+      blocks.get(i).RayCast = false;
+    }
+    fill(blocks.get(i).colour,blocks.get(i).fade);
+    stroke(1);
+    rect(blocks.get(i).pos[0], blocks.get(i).pos[1], blocks.get(i).size, blocks.get(i).size);
+    blocks.get(i).fade= max(blocks.get(i).fade-10,0);
+  }
 }
+
+/**************************
+*Draws all Text on screen
+**************************/
+void DrawText() {
+  textSize(30);
+  fill(255);
+  String text = "FoodCount: "+ maxFood+
+   "\nSnake Size: "+snake.SLength+
+   "\nposx" +snake.body.get(0).pos[0]+
+   "\nposy"+snake.body.get(0).pos[1]+
+   "\nAngle "+snake.Angle*180/PI+
+   "\nDead: "+lvls.Killcount;
+  text(text, 0, 30);
+}
+
 /***************************************
-*Calculates between mouse and Snakehead
-***************************************/
-float Anglecalc(float x, float y, float x2, float y2) {    //Angle between mouse and Snake
-  float dx = -x+x2;
+ *Calculates between mouse and Snakehead
+ ***************************************/
+float Anglecalc(int x, int y, int x2, int y2) {    //Angle between mouse and Snake
+  float dx = x2-x;
   float dy = y-y2;
   float Angle;
   float d=sqrt(dx*dx+dy*dy);
   Angle = acos(dy/d);
-  if(dx < 0)
+  if (dx < 0)
     Angle = 2*PI-Angle;
-  //print(Angle+ "    "+snake.pos[0][0]+  "      "+ mouseX+"\n");
-  
-/*  float Angle = 2*atan(dy/sqrt(dx*dx+dy*dy));
-  if (dx<0 && dy<0)    //2. quadrant
-    Angle = 2*PI+Angle;
-  if (dx<0 && dy>=0)    //1. quadrant
-  {
-  }
-  if (dx>=0 && dy<0)    //3. quadrant
-    Angle = PI-Angle;
-  if (dx>=0 && dy>=0)    //4. quadrant
-    Angle = PI-Angle;
-    */
   return Angle;
+}
+
+/**************************
+*Calculates the distance
+**************************/
+float distance (int x1, int y1, int x2, int y2) {
+  int dx = x1-x2;
+  int dy = y1-y2;
+  return sqrt(dx*dx+dy*dy);
 }
