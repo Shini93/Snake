@@ -16,14 +16,13 @@ class Ray{
     Angle = pAngle;
     pos[1][0] = round(pos[0][0]+sin(Angle)*100);
     pos[1][1] = round(pos[0][1]-cos(Angle)*100);
-    checkObstacle();
-    drawLine();
+
   }
-  void update(){
-    float diffAngle = min((2 * PI) - abs(Angle - snake.Angle), abs(Angle - snake.Angle));
+  void update(int x, int y, float SnakeAngle){
+    float diffAngle = min((2 * PI) - abs(Angle - SnakeAngle), abs(Angle - SnakeAngle));
     if(diffAngle < PI/8){            //double degrees, since its -PI/4 to +PI/4
-      pos[0][0] = snake.body.get(0).pos[0];
-      pos[0][1] = snake.body.get(0).pos[1];
+      pos[0][0] = x;
+      pos[0][1] = y;
       checkObstacle();
       if(obstacle == true)
         drawLine();
@@ -44,11 +43,11 @@ class Ray{
     float den,t,u=0;
     for(int i=0;i<food.size();i++){
       float Angle2;
-      float dist2 = dist(snake.body.get(0).pos[0],snake.body.get(0).pos[1],food.get(i).posx,food.get(i).posy);
-      if(snake.body.get(0).pos[0]<food.get(i).posx)
-        Angle2 = acos((food.get(i).posy-snake.body.get(0).pos[1])/dist2);
+      float dist2 = dist(pos[0][0],pos[0][1],food.get(i).posx,food.get(i).posy);
+      if(pos[0][0]<food.get(i).posx)
+        Angle2 = acos((food.get(i).posy-pos[0][1])/dist2);
       else
-        Angle2 = acos((-food.get(i).posy+snake.body.get(0).pos[1])/dist2);
+        Angle2 = acos((-food.get(i).posy+pos[0][1])/dist2);
       x1 = int(food.get(i).posx-cos(Angle2)*food.get(i).normalSize/2);
       y1 = int(food.get(i).posy+sin(Angle2)*food.get(i).normalSize/2);
       x2 = int(food.get(i).posx+cos(Angle2)*food.get(i).normalSize/2);

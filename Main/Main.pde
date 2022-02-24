@@ -6,48 +6,48 @@ byte GameSpeed = 20;            //sets fps
 byte BlockSize = 30;            //Size of all blocks
 byte MaxPortals = 3;            //Maximum Portals in the game
 byte maxSnakes = 1;             //not implemented yet
-boolean missilealive = false;   //No Kaboom anymore
+
 int maxRays = 720;              //Maximum number of Rays for the Raycasting
 int marginX = 200;
 int marginY = 100;
 int fadeBlocks = 20;
 int maxFood = 0;
 int maxLevel = 1;
-int[] colorSnake = new int[3];
 ArrayList<Food> food = new ArrayList <Food>();  //Spawns Food
 ArrayList <Blocks> blocks = new ArrayList <Blocks>();
-
-
-boolean counter = true;
-color testfarbe = 0;
-
+color[] SnakeColor = {#AAFFFF , #FF7E80, #FF7EF0, #917EFF, #7EC0FF, #7EFFB9, #A4FF7E, #FFFB7E, #FFB27E, #FFFFFF};
+int SnakeColorSelected = 0;
 
 Portal[] portal = new Portal[MaxPortals];  //creates Portal Array, filled in in lvl file.
 MissilePath [] path = new MissilePath [100];  //creates missilepath
-Ray[] ray = new Ray[maxRays];
 
-Snake snake = new Snake();      //Snek
+Snake[] snake = new Snake[3];      //Snek
 Level lvl = new Level();        //has all the lvls in it
 lvlHandler lvls = new lvlHandler();  //Chanes levels as needed
 
-Missiles missile;               //Kaboom!
+
 
 /*************************************
  *Initialises program
  *************************************/
 void SetupSnake(){
-  snake = new Snake(); //<>//
+  snake[0] = new Snake(false,int(random(800)),int(random(800)));
+  snake[0].initRays();
+  snake[0].missile = new Missiles();
+  for(int i=1;i<snake.length;i++){
+    snake[i] = new Snake(true,int(random(800)),int(random(800))); //<>//
+    snake[i].initRays();
+    snake[i].missile = new Missiles();
+  }
   path[0] = new MissilePath(); //<>//
-  missile = new Missiles();
-  lvls.start();                            //starts the first level
-  missilealive = false;                    //No Kaboom anymore
   
+  
+  snake[0].missilealive = false;                    //No Kaboom anymore
+  lvls.start();                            //starts the first level
   frameRate(GameSpeed);                    //sets the gamespeed to a 20 fps
 
   /*initialises the Raycasting*/
-  for (int i=0; i<maxRays; i++) {
-    ray[i] = new Ray(snake.body.get(0).pos[0], snake.body.get(0).pos[1], i*PI/360);
-  }  //<>//
+  
 }
 
 /**********************************
@@ -56,18 +56,22 @@ void SetupSnake(){
  ***********************************/
 void draw() {
   if(shopmenu == true)
-    testfarbe = shopMenu(testfarbe);
+    showSnake();
   if(GameStart == false)
     return;
   background(0);
   lvls.victory();        //Checks if the level is finished
+  
   fill(0);
   stroke(255);
   rect(200,100,800,800);
+  
   push();
   translate(200,100);
-  for (int i=0; i<maxRays; i++) {
-    ray[i].update();
+  for(int k=0;k<snake.length;k++){
+    for (int i=0; i<maxRays; i++) {
+      snake[k].ray[i].update(snake[k].body.get(0).pos[0],snake[k].body.get(0).pos[1],snake[k].Angle);
+    }
   }
   DrawFood();
   DrawSnake();
@@ -77,6 +81,7 @@ void draw() {
   DrawPortal();
   DrawText();
   pop();
+
 }
 
 /********************
@@ -84,37 +89,41 @@ void draw() {
  *Starts Missles
  ********************/
 void mousePressed() {
-  missilealive = true;
+  if(GameStart== false)
+    return;
+  snake[0].missilealive = true;
   float dAngle;      //Angle difference between the snake head and the block with the nearest Angle
   float Angle;
   float min=2*PI;    //minumum Angle between Snake and block
   int id=0;
   for (int i=0; i<blocks.size()-1; i++) {
-    Angle = Anglecalc(snake.body.get(0).pos[0], snake.body.get(0).pos[1], blocks.get(i).pos[0]+blocks.get(i).size/2, blocks.get(i).pos[1]+blocks.get(i).size/2);
-    dAngle = abs(Angle - snake.Angle);
+    Angle = Anglecalc(snake[0].body.get(0).pos[0], snake[0].body.get(0).pos[1], blocks.get(i).pos[0]+blocks.get(i).size/2, blocks.get(i).pos[1]+blocks.get(i).size/2);
+    dAngle = abs(Angle - snake[0].Angle);
     if (dAngle<min) {
       min = dAngle;
       id = blocks.get(i).id;
     }
   }
-  missile = new Missiles(id, snake.body.get(0).pos[0], snake.body.get(0).pos[1]);    //adds missile starting from the snake
+  snake[0].missile = new Missiles(id, snake[0].body.get(0).pos[0], snake[0].body.get(0).pos[1]);    //adds missile starting from the snake
 }
 
 /**********************************
  *Draws the Snake(s)
  **********************************/
 void DrawSnake() {
-  if (snake.dead==true)
+  if (snake[0].dead==true)
     lvls.reset();
-  snake.move();
-  for (int i=0; i<snake.SLength; i++) {
-    fill(snake.BodyColour(i),255);
-    stroke(#000000);
-    circle(snake.body.get(i).pos[0], snake.body.get(i).pos[1], snake.size);
-    fill(snake.BodyColour(i),40);
-    noStroke();
-    circle(snake.body.get(i).pos[0], snake.body.get(i).pos[1], snake.size+10);
-    stroke(1);
+  for(int k=0;k<snake.length;k++){
+    snake[k].move();
+    for (int i=0; i<snake[k].SLength; i++) {
+      fill(snake[k].BodyColour(i),255);
+      stroke(#000000);
+      circle(snake[k].body.get(i).pos[0], snake[k].body.get(i).pos[1], snake[k].size);
+      fill(snake[k].BodyColour(i),40);
+      noStroke();
+      circle(snake[k].body.get(i).pos[0], snake[k].body.get(i).pos[1], snake[k].size+10);
+      stroke(1);
+    }
   }
 }
 
@@ -178,12 +187,14 @@ void drawGradient(float x, float y, int size) {
  *Draws the Missile
  **************************************/
 void DrawMissile() {
-  if (missilealive == true) {
-    missile.move();
-    fill(#FF0000);
-    circle(missile.pos[0], missile.pos[1], 3);
-    fill(#FFAAAA,50);
-    circle(missile.pos[0], missile.pos[1], 9);
+  for(Snake s : snake){
+    if (s.missilealive == true) {
+      s.missile.move();
+      fill(#FF0000);
+      circle(s.missile.pos[0], s.missile.pos[1], 3);
+      fill(#FFAAAA,50);
+      circle(s.missile.pos[0], s.missile.pos[1], 9);
+    }
   }
 }
 
@@ -191,14 +202,16 @@ void DrawMissile() {
  *Draws the Path of the Missile
  **************************************/
 void DrawPath() {
-  if(missile.alive ==0)
-    return;
-  path[missile.alive-1] = new MissilePath(missile.pos[0], missile.pos[1]);
-  for (int i=0; i<missile.alive-1; i++) {
-    if (path[i].alive >= 0) {
-      fill(#FFFFFF, path[i].fade);
-      circle(path[i].pos[0], path[i].pos[1], path[i].size);
-      path[i].update();
+  for(Snake s: snake ){
+    if(s == null || s.missile.alive ==0)
+      return;
+    path[s.missile.alive-1] = new MissilePath(s.missile.pos[0], s.missile.pos[1]);
+    for (int i=0; i<s.missile.alive-1; i++) {
+      if (path[i].alive >= 0) {
+        fill(#FFFFFF, path[i].fade);
+        circle(path[i].pos[0], path[i].pos[1], path[i].size);
+        path[i].update();
+      }
     }
   }
 }
@@ -232,10 +245,10 @@ void DrawText() {
   textSize(30);
   fill(255);
   String text = "FoodCount: "+ maxFood+
-   "\nSnake Size: "+snake.SLength+
-   "\nposx" +snake.body.get(0).pos[0]+
-   "\nposy"+snake.body.get(0).pos[1]+
-   "\nAngle "+snake.Angle*180/PI+
+   "\nSnake Size: "+snake[0].SLength+
+   "\nposx" +snake[0].body.get(0).pos[0]+
+   "\nposy"+snake[0].body.get(0).pos[1]+
+   "\nAngle "+snake[0].Angle*180/PI+
    "\nDead: "+lvls.Killcount;
   text(text, 0, 30);
 }

@@ -16,7 +16,7 @@ class Missiles {
   }
 
   void reset() {
-    missilealive = false;
+    snake[0].missilealive = false;
     velocity = 0;
     for (int i=0; i<10; i++) {
       pos[0] = 0;

@@ -1,5 +1,6 @@
 class SnakeBody{
-  int[] pos = new int[2];
+  int[] pos = {0,0};
+
   int size = 10;
   color colour = #00FFFF;
   

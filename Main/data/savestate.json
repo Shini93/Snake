@@ -1,7 +1,15 @@
 {
-  "maxLevel": 4,
-  "colorSnakeBlue": 255,
-  "colorSnakeRed": 50,
-  "colorSnakeGreen": 255,
-  "maxFood": 533
+  "maxLevel": 6,
+  "Skin_9": false,
+  "Skin_8": false,
+  "Skin_7": true,
+  "Skin_6": false,
+  "Skin_5": false,
+  "Skin_4": false,
+  "Skin_3": false,
+  "Skin_2": true,
+  "maxFood": 251,
+  "Skin_1": true,
+  "Skin_0": true,
+  "SnakeColorSelected": 2
 }

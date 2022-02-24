@@ -1,14 +1,15 @@
 import interfascia.*;
 boolean shopmenu = false;
 GUIController Menu, lvlSettings, backHandler, ShopHandler;
-IFButton start, settings, levelsetting, back, shop;
+IFButton start, settings, levelsetting, back, shop, s_back, s_forward, buy, backShop;
 IFButton[] levels = new IFButton [10];
 PImage[] img = new PImage[10];
 PImage imgLock;
 boolean GameStart = false;
 boolean[] deactivateButton = new boolean[3];
 DataHandler datahandler = new DataHandler();
-
+int SnakeNormalColor = 0;
+boolean[] boughtItems = new boolean[SnakeColor.length];
 
 void setup() {
   size(1200, 1000);                          //starting size of the game
@@ -52,10 +53,12 @@ void actionPerformed (GUIEvent e) {
     background(100, 100, 130);
     deactivateButton[0] = true;
   }else if (e.getSource() == shop && deactivateButton[0] == false) {
+    datahandler.savetoJson();
     Menu.setVisible(false);
     background(100, 100, 130);
     shopmenu = true;
     deactivateButton[0] = true;
+    shopMenu();
   }
   else if (e.getSource() == back) {
     lvls.lvlSelect = -1;
@@ -65,6 +68,35 @@ void actionPerformed (GUIEvent e) {
     backHandler.setVisible(false);
     background(100, 100, 130);
     Menu.setVisible(true);
+  }
+  else if (e.getSource() ==s_back) {
+    SnakeColorSelected--;
+    if(SnakeColorSelected<0)
+      SnakeColorSelected = SnakeColor.length-1;
+    if(boughtItems[SnakeColorSelected] == true)
+      buy.setLabel("\nchoose");
+    else
+      buy.setLabel("\nbuy");
+  }
+  else if (e.getSource() ==s_forward) {
+    SnakeColorSelected++;
+    if(SnakeColorSelected>=SnakeColor.length)
+      SnakeColorSelected = 0;
+    if(boughtItems[SnakeColorSelected] == true)
+      buy.setLabel("\nchoose");
+    else
+      buy.setLabel("\nbuy");
+  }
+  else if (e.getSource() ==buy) {
+    buySkin();
+  }
+  else if (e.getSource() == backShop){
+    background(100, 100, 130);
+    Menu.setVisible(true);
+    ShopHandler.setVisible(false);
+    SnakeColorSelected = SnakeNormalColor;
+    shopmenu = false;
+    deactivateButton[0] = false;
   }
   else{
     if(deactivateButton[1] == false){
@@ -115,31 +147,64 @@ void levelSettingsInit(){
      } //<>//
   } 
 }
-color shopMenu(color farbe){
-  float red = red(farbe);
-  float green = green(farbe);
-  float blue = blue(farbe);
+void shopMenu(){
+  ShopHandler = new GUIController (this);
+   //<>//
+  s_back = new IFButton ("\nBack", width/10, 500-20, width/10, 40);
+  s_forward = new IFButton ("\nNext", 8*width/10, 500-20, width/10, 40);
+  buy = new IFButton ("\nBuy", width/2-width/10, 600, width/5, 40);
+  backShop = new IFButton ("\nBack", width/2-width/3, 600, width/10, 40);
+  s_back.addActionListener(this);
+  s_forward.addActionListener(this);
+  buy.addActionListener(this);
+  backShop.addActionListener(this);
+  ShopHandler.add (s_back);
+  ShopHandler.add (s_forward);
+  ShopHandler.add (buy);
+  ShopHandler.add (backShop);
+  // ShopHandler.setVisible(false);
+  SnakeNormalColor = SnakeColorSelected;
+  fill(0);
+  triangle(width/10,500,2*width/10,520,2*width/10,480);
+  triangle(9*width/10,500,8*width/10,520,8*width/10,480);  
+  textSize(30);
+  fill(#FFFBA2);
+  text("Costs 5000 food",width/2-150,400);
+  text(maxFood+" food",width/10,100);
+}
 
-  if(second() %3 == 0 && counter == true){
-    red = random(255);
-    green =random(255);
-    blue = random(255);
-    counter = false;
-  }
-  if(second() %3 != 0)
-    counter = true;
+void showSnake(){
   float frequency = 2*PI/30;
   float offsetfrequency = (millis()*0.01)%(2*PI);
-  int offsetx = 400;
+  int offsetx = 450;
   int offsety = 500;
   int size = 30;
   int stepsize = 5;
   int amplitude = 20;
   int NumberBody = 60;
-  background(100, 100, 130);
-  for(int i=0;i<NumberBody;i+=2){
-    fill(color((NumberBody-i)*red/NumberBody,(NumberBody-i)*green/NumberBody,(NumberBody-i)*blue/NumberBody)); 
+  
+ // background(100, 100, 130);
+  fill(255);
+  noStroke();
+  rect(offsetx-size/2,offsety-size/2-amplitude,60*5+31,amplitude+2*size-10);
+  stroke(0);
+  for(int i=0;i<=NumberBody;i+=2){
+    fill(color((NumberBody-i)*red(SnakeColor[SnakeColorSelected])/NumberBody,(NumberBody-i)*green(SnakeColor[SnakeColorSelected])/NumberBody,(NumberBody-i)*blue(SnakeColor[SnakeColorSelected])/NumberBody)); 
     circle(offsetx+i*stepsize,offsety+amplitude*sin( i*frequency+offsetfrequency),size);
-  }
-  return color(red,green,blue);
+  } 
+}
+void buySkin(){
+   if(buy.getLabel()=="\nchoose"){
+       SnakeNormalColor = SnakeColorSelected;
+       boughtItems[SnakeColorSelected] = true;
+       datahandler.savetoJson();
+   }else{
+     if(maxFood>=5000){
+       maxFood-=5000;
+       SnakeNormalColor = SnakeColorSelected;
+       boughtItems[SnakeColorSelected] = true;
+       datahandler.savetoJson();
+       buy.setLabel("\nchoose");
+     }  
+   }
 }

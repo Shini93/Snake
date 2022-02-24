@@ -10,9 +10,9 @@ class Level {
   }
 
   void callBlocks(byte level,int[][] pos) {
-    food.clear(); //<>//
-    snake.body.get(0).pos[0] = pos[0][0];
-    snake.body.get(0).pos[1] = pos[0][1];
+    food.clear();
+    snake[0].body.get(0).pos[0] = pos[0][0];
+    snake[0].body.get(0).pos[1] = pos[0][1];
     for (int i=0; i<100; i++) {
       food.add(new Food(i, round(random(1)), int(random(width-2*marginX)), int(random(height-2*marginY))));
     }
@@ -39,14 +39,14 @@ class Level {
     }
     
     int[] x = new int [pos.length/2+1];
-    int[] y = new int [pos.length/2+1]; //<>//
+    int[] y = new int [pos.length/2+1];
     for (int i=1; i<pos.length/2+1; i++) {
       x[i]=pos[i][0];
       y[i]=pos[i][1];
     }
     //AddPortal(new int[]{50,50,750,750,200,200,500,500});
     blocksize = pos.length;
-    fillBlocks(x,y); //<>//
+    fillBlocks(x,y);
   }
   
   

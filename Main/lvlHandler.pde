@@ -7,14 +7,14 @@ class lvlHandler{
     
   }
   void victory(){
-    if(snake.SLength>=lvl.winsize){ //<>//
-       if(actualLevel < lvl.maxLvl){ //<>//
-         actualLevel++; //<>//
+    if(snake[0].SLength>=lvl.winsize){
+       if(actualLevel < lvl.maxLvl){
+         actualLevel++;
          if(actualLevel > maxLevel)
-           maxLevel++; //<>//
-         deactivateButton[0] = false; //<>//
-         datahandler.savetoJson(); //<>//
-         reset(); //<>//
+           maxLevel++;
+         deactivateButton[0] = false;
+         datahandler.savetoJson();
+         reset();
          GameStart = false;
          Menu.setVisible(true);
          
@@ -26,10 +26,10 @@ class lvlHandler{
     lvl.maxLvl = reader.getlatestLevel();
     //reader.readData();
     if(lvlSelect == -1)
-      lvl.callBlocks(byte(actualLevel),reader.readData());                 //starts at lvl 1 //<>//
+      lvl.callBlocks(byte(actualLevel),reader.readData());                 //starts at lvl 1
     else{
       actualLevel = lvlSelect;
-      lvl.callBlocks(byte(lvlSelect),reader.readData());  //<>// //<>//
+      lvl.callBlocks(byte(lvlSelect),reader.readData());  //<>//
     }
   }
   void getLatestLevel(){
@@ -38,11 +38,14 @@ class lvlHandler{
   void reset(){
  //   reader = new lvlReader();
     food.clear();
-    snake = new Snake();
+    for(int i=0;i<snake.length;i++)
+      snake[i] = new Snake(false, int(random(800)), int(random(800)));
     path = new MissilePath[100];
     blocks.clear();
     lvl.blocksize=0;
-    missile = new Missiles();
+    for(Snake s : snake){
+      s.missile = new Missiles();
+    }
     portal = new Portal[MaxPortals];
     lvl.setPortal = false;
     Killcount++;
