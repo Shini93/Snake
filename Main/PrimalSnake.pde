@@ -3,11 +3,10 @@ class PrimalSnake{
    *Public Variables
    ***************************************/
   float Angle = PI/2; //Angle of moving
-  float oldAngle;  //Angle from one iteration before
+  float oldAngle = 0;  //Angle from one iteration before
   byte size = 10;  //startsize of the Snake
-  float FieldSize = 7;            //Startsize of each Snakesegment
-  int MaxLength = 1000;          //maximum length of snake
-  //int pos[][] = new int [MaxLength][2]; //  [Head][x,y]
+  float FieldSize = 6;            //Startsize of each Snakesegment
+  int MaxLength = 1000;          //maximum length of snake  
   color colour = #00FFFF;  //Colour of the Snake
   int newpos[] = new int[2];
   int startLength = 20;
@@ -16,9 +15,11 @@ class PrimalSnake{
   boolean NPC = false;
   int portaltime = 0;
   int wallteletime = 0;
+  int lastBody = SLength;
+  int id;
+  
   ArrayList <SnakeBody> body = new ArrayList <SnakeBody>();
-  
-  
+  float speedSnake = 1;
   /*****************************************
    *Returns colour of Snakebody on given pos
    *****************************************/
@@ -78,10 +79,16 @@ class PrimalSnake{
       distance = sqrt((food.get(i).posx-newpos[0])*(food.get(i).posx-newpos[0])+(food.get(i).posy-newpos[1])*(food.get(i).posy-newpos[1]));
       if (distance < (food.get(i).size+size)/2) {
         for(int k=0;k<food.get(i).value;k++)
-          body.add(new SnakeBody(15,15));
-        SLength+=food.get(i).value;
-        maxFood+=food.get(i).value;
-        food.get(i).reset();
+          body.add(new SnakeBody(body.get(body.size()-3).pos[0],body.get(body.size()-3).pos[1]));
+        if(food.get(i).value == 0){     //Upgrade to be made
+
+        }else{
+          SLength+=food.get(i).value;
+          maxFood+=food.get(i).value;
+          food.get(i).reset();
+          fillGridsFood();
+        }
+        
       }
     } 
   }
@@ -90,24 +97,43 @@ class PrimalSnake{
    *Finds out the next tile for the Head
    ***************************************/
   void nextTile() {
-    int NewDirectionX = mouseX-marginX;
-    int NewDirectionY = mouseY-marginY;
-    
-    oldAngle = Anglecalc(body.get(0).pos[0],body.get(0).pos[1],-body.get(5).pos[0],-body.get(5).pos[1]);
-    
+
+    int NewDirectionX = 0;
+    int NewDirectionY = 0;
+
+    //oldAngle = Anglecalc(body.get(1).pos[0],body.get(1).pos[1],body.get(0).pos[0],body.get(0).pos[1]);
+ 
     if(NPC == true){
       Angle = oldAngle+random(PI/10)-PI/20;
       if(millis()%10 == 0 || millis()%11 == 0 || millis()%12 == 0)
         Angle = oldAngle+random(PI/2)-PI/4;
     }
     else if(NPC == false){
-      if(mouseX-pmouseX!=0 && mouseY-pmouseY!=0)  //snake moves always in the same direction
-        Angle = Anglecalc(body.get(0).pos[0],body.get(0).pos[1],NewDirectionX,NewDirectionY);
+      if(isAndroid == false){
+       // if(mouseX-pmouseX!=0 && mouseY-pmouseY!=0)  //snake moves always in the same direction
+         if(id == 0){
+          NewDirectionX = int(mouseX/ScaleScreenX+body.get(0).pos[0]-width/2);
+          NewDirectionY = int(mouseY/ScaleScreenY+body.get(0).pos[1]-height/2);
+          Angle = math.Anglecalc(body.get(0).pos[0],body.get(0).pos[1],NewDirectionX,NewDirectionY);
+         }
+          else if (id == 1){
+           Angle = oldAngle + PI/15 * directionKey;
+           if(Angle > 2*PI)
+             Angle = Angle - 2*PI;
+           else if (Angle<0)
+             Angle = Angle + 2*PI;
+         }
+      }
+      else{
+       Angle = AndroidAngle;  
+      }
+      Angle = math.AngleResize(Angle,oldAngle);
+      
     }
- //   float Anglediff = min((2 * PI) - abs(Angle - oldAngle), abs(Angle - oldAngle));
-
-    newpos[0] = int(body.get(0).pos[0]+FieldSize*sin(Angle));
-    newpos[1] = int(body.get(0).pos[1]-FieldSize*cos(Angle));
+   
+    newpos[0] = int(body.get(0).pos[0]-FieldSize*speedSnake*math.cosAlike(Angle));
+    newpos[1] = int(body.get(0).pos[1]-FieldSize*speedSnake*math.sinAlike(Angle));
+    oldAngle = Angle;
   }
   
   
@@ -115,15 +141,17 @@ class PrimalSnake{
    *Updates the Snake Body and Head
    ***************************************/
   void updateSnake() {
-    for (int i=SLength-1; i>0; i--) {
+    for (int i=SLength; i>0; i--) {
       body.get(i).pos[0] = body.get(i-1).pos[0];
       body.get(i).pos[1] = body.get(i-1).pos[1];
     }
+
+    
     body.get(0).pos[0] = int(newpos[0]);
     body.get(0).pos[1] = int(newpos[1]);
 
-    size=byte(9.6+round((0.15)*sqrt(SLength)));
-    FieldSize = size*0.7;
+    Calcsize();
+    FieldSize = size*0.7;   
   }
   
   void teleport(int x, int y){
@@ -131,5 +159,8 @@ class PrimalSnake{
      newpos[1] = y;
   }
   
+  void Calcsize(){
+   size=byte(9.6+round((0.15)*sqrt(SLength)));  
+  }
   
 }

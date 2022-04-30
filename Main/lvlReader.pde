@@ -7,12 +7,14 @@ class lvlReader {
     String line = null;
     String pieces = "";
     ArrayList <Integer> allPos = new ArrayList <Integer>();
+    ArrayList <Integer> allPoint = new ArrayList <Integer>();
     try {
       while ((line = reader.readLine()) != null) {
         pieces += line;
       }
       boolean counterStart = false;
       boolean SnakeFinish = false;
+      boolean countblockP = false;
       for (int i=0; i<pieces.length(); i++) {
         if (pieces.charAt(i)=='!' && SnakeFinish == false) {      //starts with x seperated from ;
           i++;
@@ -31,6 +33,19 @@ class lvlReader {
           }
           allPos.add(int(Number));
         }
+        if (pieces.charAt(i+1)=='#') {
+          countblockP = true;
+          counterStart = false;
+          i+=2;
+        }
+        if(countblockP == true){
+         String Number = "";
+          while (pieces.charAt(i)!=';') {
+            Number += pieces.charAt(i);
+            i++;
+          }
+          allPoint.add(int(Number)); 
+        }
       }
       reader.close();
     }
@@ -38,13 +53,25 @@ class lvlReader {
       e.printStackTrace();
     }
 
-    int BlockPos[][] = new int[allPos.size()][2];
+    int BlockPos[][] = new int[allPos.size()+3][2];
     int k=0;
     for (int i=0; i<allPos.size(); i+=2) {
       BlockPos[k][0] = allPos.get(i);
       BlockPos[k][1] = allPos.get(i+1);
       k++;
     }
+    
+      BlockPos[k][0] = allPoint.get(0);
+      BlockPos[k][1] = allPoint.get(1);
+    
+    int z=0;
+    int[][] movingBlocks = new int[10][2];
+    for (int i=0; i<allPoint.size(); i+=2) {
+      movingBlocks[z][0] = allPoint.get(i)+30;
+      movingBlocks[z][1] = allPoint.get(i+1)+15;
+      z++;
+    }
+    movingtiles = new movingTiles(0,movingBlocks);
     return BlockPos;
   }
 
@@ -55,10 +82,6 @@ class lvlReader {
     // list the files in the data folder
     String[] filenames = folder.list();
 
-    // display the filenames
-    for (int i = 0; i < filenames.length; i++) {
-      println(filenames[i]);
-    }
     return byte(filenames.length);
   }
 }

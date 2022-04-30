@@ -17,6 +17,4 @@ class Portal{
     pos[1][0] = posstart[2];
     pos[1][1] = posstart[3];
   }
-  
-  
 }

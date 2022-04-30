@@ -1,6 +1,9 @@
 JSONObject json;
+
+/**********************
+*Handles Savestates
+**********************/
 class DataHandler{
- 
   //TODO: Handles Upgrades
   //TODO: Handles stuff to buy
   //TODO: Handles bought stuff

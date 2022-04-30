@@ -4,7 +4,7 @@ class Level {
   byte maxLvl = 1;
   boolean setPortal = false;
   int blocksize = 0;
-  int winsize = 300;
+  int winsize = 3000;
   Level() {
 
   }
@@ -13,7 +13,7 @@ class Level {
     food.clear();
     snake[0].body.get(0).pos[0] = pos[0][0];
     snake[0].body.get(0).pos[1] = pos[0][1];
-    for (int i=0; i<100; i++) {
+    for (int i=0; i<20; i++) {
       food.add(new Food(i, round(random(1)), int(random(width-2*marginX)), int(random(height-2*marginY))));
     }
     switch (level){
@@ -24,7 +24,10 @@ class Level {
           food.add(new Food(i, 1, 110, 60+i*80));
           food.add(new Food(i*8, 1, 700, 160+i*80));
         }
-        winsize = 20+maxFood;
+        food.add(new Food(0, 3, 700, 300));
+        food.add(new Food(0, 3, 700, 400));
+        food.add(new Food(0, 3, 700, 500));
+       // winsize = 20+maxFood;
         AddPortal(new int[]{50,50,770,750});
         break;  
       case 2:

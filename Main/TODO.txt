@@ -1,0 +1,27 @@
+Food_reset:
+	nicht alle futterdurchgehen, herausfinden in welchem grid es landet und dort testen
+Block reset:
+	nicht alle blöcke durchgehen, herausfinden in welchem grid es landet und dort testen
+verbessere GridSystem
+Interface selbst erstellen für Androidport
+mehrere racketen möglich machen
+	durch upgrades schnellere racketen
+	"" "" 	       mehr Racketen
+	"" ""	       Kreisende Racketen um Schlange?
+	"" ""	       Geschwindigkeit sähmiger machen
+Portal:
+	Linie zwischen Portalen anzeigen, oder Pfeil mit Richtung zum Zielportal
+Überlegen wie das spiel beendet werden kann
+neue Level einfügen
+neue skins
+Kopfteile zu kaufen
+Upgrades kaufbar?
+Snakes:	Wallteletest nur wenn es im richtigen Grid ist!
+PrimalSnake TestFood:
+	Gridsystem!
+Snakes:
+	UpdateSnakeBody optimieren
+
+					MiniSnake berechnung parabel statt sin?
+
+					Ab Ray weiterschauen was zu machen ist (Tabs)

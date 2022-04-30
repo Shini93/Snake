@@ -1,0 +1,61 @@
+class UpgradeHandler{
+  Boolean missile = false;
+  Boolean miniSnake = false;
+  Boolean speed = false;
+  Boolean PreUpgradeEaten = false;
+  int PreUpgradePos = 0;
+  float SpeedValue;
+  int RayNenner = 16;
+  float RayRadius = PI/RayNenner;
+  int RayDistance = 300;
+  int MaxSpecials = 0;
+  byte preUpdateCounter = 0;      //counts the frames for the wanna be upgrade, until it becomes an upgrade
+  ArrayList <Special> specials = new ArrayList <Special>();
+  UpgradeHandler(){
+    
+  } 
+  
+  void update(){      //TODO: counter that counts how many upgrades were added already
+    if(PreUpgradeEaten == false)
+      return;
+    preUpdateCounter++;
+    if(preUpdateCounter>3){
+      preUpdateCounter = 0;
+      PreUpgradePos++;
+    }
+    snake[0].body.get(PreUpgradePos).size = 100+5*preUpdateCounter;
+    snake[0].body.get(PreUpgradePos).colour = #FFFFFF;
+    if(PreUpgradePos == snake[0].body.size()-1 && preUpdateCounter == 3){
+      int Specialvalue =  round(random(5));
+      if(Specialvalue == 4 && RayNenner == 1)
+        while(Specialvalue != 4)
+          Specialvalue =  round(random(5));
+      specials.add(new Special(Specialvalue));
+      MaxSpecials++;
+      PreUpgradeEaten = false;
+    }
+  }
+  
+  void addUpgrade(int count){
+    if(specials.get(count).Specialvalue ==0)
+      missile = true;    //change so that it can have multiple rockets
+    else if(specials.get(count).Specialvalue == 1){
+      speed = true;      //change so that the speed can change too!
+      SpeedValue += 0.1; 
+    }
+    else if(specials.get(count).Specialvalue == 2)
+      miniSnake = true;  //change so that 1 or 2 can be added
+    else if(specials.get(count).Specialvalue == 3)
+      RayDistance+=100-100*(RayDistance/800);
+    else if(specials.get(count).Specialvalue == 4){
+      RayNenner--;
+      RayRadius = PI/RayNenner;
+    }
+  }
+
+  void PreUpdate(){
+    PreUpgradeEaten = true;
+    PreUpgradePos = 0;
+  }
+  
+}

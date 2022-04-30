@@ -5,8 +5,8 @@ class SnakeBody{
   color colour = #00FFFF;
   
   SnakeBody(){
-    pos[0] = -20;
-    pos[1] = -20;
+    pos[0] = 0;
+    pos[1] = 0;
   }
   SnakeBody(int x, int y){
     pos[0] = x;

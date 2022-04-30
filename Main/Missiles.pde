@@ -25,19 +25,14 @@ class Missiles {
   }
 
   void move() {
-    for (int i=0; i<lvl.blocksize; i++) {
-      if (blocks.get(i).id == target) {
-        Angle = Anglecalc(pos[0],pos[1],blocks.get(i).pos[0], blocks.get(i).pos[1]);
-        pos[0] = int(sin(Angle)*velocity+pos[0]);
-        pos[1] = int(-cos(Angle)*velocity+pos[1]);
+    Angle = math.Anglecalc(pos[0],pos[1],blocks.get(target).pos[0], blocks.get(target).pos[1]);
+    pos[0] = int(-math.cosAlike(Angle)*velocity+pos[0]);
+    pos[1] = int(-math.cosAlike(Angle-PI/2)*velocity+pos[1]);
 
-        float distance = sqrt((pos[0]-blocks.get(i).pos[0])*(pos[0]-blocks.get(i).pos[0])+(pos[1]-blocks.get(i).pos[1])*(pos[1]-blocks.get(i).pos[1]));
-        if (distance <=velocity) {
-          blocks.get(i).reset();
-          reset();
-        }
-        break;
-      }
+    float distance = sqrt((pos[0]-blocks.get(target).pos[0])*(pos[0]-blocks.get(target).pos[0])+(pos[1]-blocks.get(target).pos[1])*(pos[1]-blocks.get(target).pos[1]));
+    if (distance <=velocity) {
+      blocks.get(target).reset();
+      reset();
     }
     velocity++;
     alive ++;
