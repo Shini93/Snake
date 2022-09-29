@@ -12,8 +12,14 @@ class FileHandler{
 
     PrintWriter output = createWriter("../../Main/data/level/Lvl"+level+".txt");
     String out = width+";\n"+height+"\n!"+snake[0]+";"+snake[1]+";~";
-    for(int i=0;i<blocksx.size();i++){
+    for(int i=0;i<blocksx.size();i++){          //blocks
       out = out+blocksx.get(i)+";"+blocksy.get(i)+";\n";
+    }
+    out +="#";
+    if(chosenPoint >0){
+      for(int i=0;i<chosenPoint;i++){          //blocksLine
+        out = out+BlockLine[i][0]+";"+BlockLine[i][1]+";\n";
+      }
     }
     output.write(out);
     output.flush();
@@ -68,7 +74,7 @@ class FileHandler{
         }
         if (counterStart) {
           String Number = "";
-          while (pieces.charAt(i)!=';') {
+          while (pieces.charAt(i)!=';' && pieces.charAt(i) != '#') {
             Number += pieces.charAt(i);
             i++;
           }
@@ -84,7 +90,7 @@ class FileHandler{
 
     int BlockPos[][] = new int[allPos.size()][2];
     int k=0;
-    for (int i=0; i<allPos.size(); i+=2) {
+    for (int i=0; i<allPos.size()-1; i+=2) {
       BlockPos[k][0] = allPos.get(i);
       BlockPos[k][1] = allPos.get(i+1);
       k++;
