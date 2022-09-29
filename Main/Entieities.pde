@@ -65,7 +65,7 @@ class Food {
   **************************************/
   void init () {
     colour = color(#FFFFFF);
-    if (FoodKind == 0) {
+    if (FoodKind == 0) {    //Green
       size = 5;
       normalSize = 5;
       BGcolour = color(#00FF00);
@@ -73,12 +73,12 @@ class Food {
     } else if (FoodKind ==1) {
       size = 10;
       normalSize = 10;
-      BGcolour = color(#0000FF);
+      BGcolour = color(#0000FF);  //Blue
       value = 5;
     } else {
       size = 15;
       normalSize = 15;
-      BGcolour = color(#FFFF00);
+      BGcolour = color(#FF0000);  //Red
       value = 0;                    //Adds Special after some time
     }
   }
@@ -124,8 +124,9 @@ class movingTiles{
   movingTiles(int id, int[][] PATH ){
     blockID = id;
     Path = PATH;
-    while(PATH[i][0] > -1)
+    while(PATH[maxCorner][0] > 0)
       maxCorner++;
+    //maxCorner = byte(PATH.length-1);
   }
   void reset(){
     rectcorner=0;

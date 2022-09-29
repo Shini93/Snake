@@ -9,23 +9,30 @@ class DataHandler{
   //TODO: Handles bought stuff
   
   DataHandler(){
-    
-    
+
   }
 
   void savetoJson(){
+    String path = "savestate.json";
+    if (isAndroid == false)
+      path = "data/"+path;
+
     json = new JSONObject();
     json.setInt("maxFood", maxFood);
     json.setInt("maxLevel", maxLevel);
     json.setInt("SnakeColorSelected",SnakeColorSelected);
     for(int i=0;i<SnakeColor.length;i++)
       json.setBoolean("Skin_"+i,boughtItems[i]);
-    saveJSONObject(json, "data/savestate.json");
+    saveJSONObject(json, path);
+
   }
   
   void readJson(){
-    
-    json = loadJSONObject("data/savestate.json");
+    String path = "savestate.json";
+    if (isAndroid == false)
+      path = "data/"+path;
+
+    json = loadJSONObject(path);
     if (json == null)
       return;
     maxFood = json.getInt("maxFood");
@@ -34,5 +41,5 @@ class DataHandler{
     
     for(int i=0;i<SnakeColor.length;i++)
       boughtItems[i] = json.getBoolean("Skin_"+i);
-  }   
+  }
 }

@@ -1,7 +1,7 @@
 class UpgradeHandler{
   Boolean missile = false;
   Boolean miniSnake = false;
-  Boolean speed = false;
+  Boolean speed = true;
   int glow = 100;       //glow radius
   int glowdistance = 100;
   Boolean[] PreUpgradeEaten = new Boolean[10];

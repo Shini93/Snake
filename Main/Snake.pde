@@ -90,6 +90,7 @@ class Snake extends PrimalSnake {
           food.get(i).reset();
           grid.get(gridIDs.get(b)).food.remove(c);
           fillGridsFood();
+          DrawFood();
         }
         if (distance < nearestDist) {
           nearestDist = distance;
@@ -119,14 +120,6 @@ class Snake extends PrimalSnake {
       int maxdist = size/2;
       if (s.speedSnake>1)
         maxdist = size; //<>// //<>// //<>//
-      //for (int i=0; i<s.SLength; i++) {
-      //  float distance = 999;
-      //    distance = sqrt((s.body.get(i).pos[0]-newpos[0])*(s.body.get(i).pos[0]-newpos[0])+(s.body.get(i).pos[1]-newpos[1])*(s.body.get(i).pos[1]-newpos[1]));
-      //    if (distance < maxdist) {
-      //      dead = true;
-      //      return;
-      //    }
-      //}
       for(int b = 0; b<s.SLength;b++){
         float distance =  sqrt((s.body.get(b).pos[0]-newpos[0])*(s.body.get(b).pos[0]-newpos[0])+(s.body.get(b).pos[1]-newpos[1])*(s.body.get(b).pos[1]-newpos[1]));
         if (distance < maxdist) {    //snek eats snek

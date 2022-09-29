@@ -16,7 +16,6 @@ class miniSnake extends PrimalSnake{
       AngleSnake = -PI/2; 
   }
   
-  
   @Override
   void nextTile() {
     body.get(0).pos[0] = snake[snakeID].body.get(0).pos[0]      //snakeHead Main
@@ -26,7 +25,6 @@ class miniSnake extends PrimalSnake{
     body.get(0).pos[1] = snake[snakeID].body.get(0).pos[1]-int((distancesindelta*math.sinS(distanceAngledelta)+distanceSnake)*math.sinS(snake[snakeID].Angle+AngleSnake));
     distanceAngledelta+=80*PI/360;
   }
-  
   
   @Override
   void Calcsize(){

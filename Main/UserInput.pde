@@ -6,7 +6,7 @@ void mousePressed() {
   if(GameStart== false)
     return;
   if(mouseButton == LEFT && snake[0].upgrades.speed == true){
-    snake[0].speedSnake = 2;
+    snake[0].speedSnake *= 2;
   }
   if(mouseButton == RIGHT && snake[0].upgrades.missile == true){
     snake[0].missilealive = true;
@@ -32,8 +32,8 @@ void mousePressed() {
 }
 
 void mouseReleased(){
-  if(GameStart == true)
-    snake[0].speedSnake = 1; 
+  if(GameStart == true && mouseButton == LEFT)
+    snake[0].speedSnake /= 2; 
 }
 
 
@@ -42,11 +42,11 @@ void keyPressed(){
      snake[0].dead = true;
      datahandler.savetoJson();
      GameStart = false;
-     Menu.setVisible(true);
      deactivateButton[0] = false;
      shopmenu = false;
      background(125);
      key = 0;
+     initButtons();
    }
    else if(key == ESC)
      exit();
@@ -58,12 +58,12 @@ void keyPressed(){
      directionKey = 1;
    else if(key == 'm' || key == 'M'){
      if(snake[1].upgrades.speed == true)
-       snake[1].speedSnake = 2;
+       snake[1].speedSnake *= 2;
   }
 }
 
 void keyReleased(){
    directionKey = 0; 
    if(NumberPlayer >1 && snake[1] != null)
-     snake[1].speedSnake = 1;
+     snake[1].speedSnake /= 2;
 }

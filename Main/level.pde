@@ -5,6 +5,7 @@ class Level {
   boolean setPortal = false;
   int blocksize = 0;
   int winsize = 3000;
+  int count=1;
   Level() {
 
   }
@@ -41,20 +42,25 @@ class Level {
         break;  
     }
     
-    int[] x = new int [pos.length/2+1];
-    int[] y = new int [pos.length/2+1];
-    for (int i=1; i<pos.length/2+1; i++) {
+    
+    
+    while(pos[count][0] != 0 && pos[count][1] != 0){
+      count++;
+    }
+    int[] x = new int [count];
+    int[] y = new int [count];
+    for (int i=1; i<=count-1; i++) {
       x[i]=pos[i][0];
       y[i]=pos[i][1];
     }
     //AddPortal(new int[]{50,50,750,750,200,200,500,500});
-    blocksize = pos.length;
+    blocksize = count;
     fillBlocks(x,y);
   }
   
   
   void fillBlocks(int[] x, int[] y){
-    for (int i=1; i<=blocksize/2-1; i++) {
+    for (int i=1; i<=x.length-1; i++) {
       blocks.add(new Blocks(i, x[i], y[i]));
     } 
   }

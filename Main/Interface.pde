@@ -1,143 +1,194 @@
-import interfascia.*;
  //<>//
+class Button{
+   int deltaT =0;
+   color c = colorscheme[2];
+   color bgc = colorscheme[0];
+   String text = "Button 1g dthdxhdygfysd s  rsy g"; 
+   int x = 0;
+   int y = sizeFont;
+   int boxSizeX = 300;
+   int boxSizeY = 30;
+   int opacity = 255;
+   void initButton(){
+     DrawButton();
+   }
+   Button(int x1, int y1, String text1){
+     x=x1;
+     y=y1+sizeFont;
+     text = text1;
+     initButton();
+   }
+   Button(int x1, int y1, int x2, int y2, String text1){
+     x=x1;
+     y=y1+sizeFont;
+     boxSizeX = x2;
+     boxSizeY = y2;
+     text = text1;
+     initButton();
+   }
+   Button(int x1, int y1, int x2, int y2, String text1, int opacityy){
+     x=x1;
+     opacity = opacityy;
+     y=y1+sizeFont;
+     boxSizeX = x2;
+     boxSizeY = y2;
+     text = text1;
+     initButton();
+   }
+   Button(int x1, int y1, String text1, color c1, color bg){
+     x=x1;
+     y=y1+sizeFont;
+     text = text1;
+     c = c1;
+     bgc = bg;
+     initButton();
+   }
+   Button(int x1, int y1, String text1, color c1, color bg, int size){
+     x=x1;
+     y=y1+sizeFont;
+     text = text1;
+     c = c1;
+     bgc = bg;
+     sizeFont = size;
+     initButton();
+   }
+   void DrawButton(){
+     noStroke();
+     fill(bgc, opacity);
+     rect(x,y-boxSizeY+3,boxSizeX,boxSizeY+6);
+     fill(c, opacity);
+     text(text,x+int(boxSizeX-textWidth(text))/2,y-2*boxSizeY+10);
+   }
+   Boolean isFired(){
+     if(mousePressed  == false)
+       return false;
+     if(mouseX<x) 
+       return false;
+     if(mouseX > x+boxSizeX)
+       return false;
+     if(mouseY < y-boxSizeY+3)
+       return false;
+     if(mouseY > y+ 6)
+       return false;
+     if(deltaT>0)
+       if(millis()-deltaT < 200)
+         return false;
+     deltaT = millis();
+    return true;  
+   } 
+}
+
 
 void initButtons(){
-  
-  IFLookAndFeel greenLook = new IFLookAndFeel(this, IFLookAndFeel.DEFAULT);
-  greenLook.baseColor = color(100, 180, 100);
-  greenLook.highlightColor = color(70, 135, 70);
-  Menu = new GUIController (this);
-  Menu.setLookAndFeel( greenLook);
-  
-  start = addButton(this,Menu,start,"\nSTART",width/2-150, height/2-1*height/10, 300, 40);
-  levelsetting = addButton(this,Menu,levelsetting,"\nLevel", width/2-150, height/2, 300, 40);
-  shop = addButton(this,Menu,shop,"\nShop", width/2-150, height/2+height/10, 300, 40);
-  settings = addButton(this,Menu,settings,"\nSETTINGS", width/2-150, height/2+2*height/10, 300, 40);
+
+  start = new Button(width/2-150, height/2-1*height/10,"\nSTART");
+  levelsetting = new Button( width/2-150, height/2,"\nLevel");
+  shop = new Button( width/2-150, height/2+height/10,"\nShop");
+  settings = new Button(width/2-150, height/2+2*height/10,"\nSETTINGS");
+  for(int i=1;i<3;i++)
+    deactivateButton[i] = true;
 }
  
-void actionPerformed (GUIEvent e) {
-  /********************************
-  *1. Level
-  ********************************/
-  if (e.getSource() == start && deactivateButton[0] == false) {          //Startbutton
-    Menu.setVisible(false);
-    SetupSnake();
-    GameStart = true;
-    deactivateButton[0] = true;
-  }else if (e.getSource() == levelsetting && deactivateButton[0] == false) {  //LevelButton
-    levelSettingsInit();
-    deactivateButton[0] = true;
-  }else if (e.getSource() == settings && deactivateButton[0] == false) {      //SettingsButton
-    background(100, 100, 130);
-    deactivateButton[0] = true;
-  }else if (e.getSource() == shop && deactivateButton[0] == false) {          //ShopButton
-    datahandler.savetoJson();
-    Menu.setVisible(false);
-    background(100, 100, 130);
-    shopmenu = true;
-    deactivateButton[0] = true;
-    shopMenu();
-  }
+ void checkFeedback(){
+    /********************************
+    *1. Level
+    ********************************/
+    if(deactivateButton[0] == false){        
+      if( start.isFired()==true){
+        SetupSnake();
+        GameStart = true;
+        deactivateButton[0] = true;
+      }else if (levelsetting.isFired() == true) {  //LevelButton
+        levelSettingsInit();
+        deactivateButton[0] = true;
+      }else if (shop.isFired()) {          //ShopButton
+        datahandler.savetoJson();
+        background(100, 100, 130);
+        shopmenu = true;
+        deactivateButton[0] = true;
+        shopMenu();
+      }else if (settings.isFired()) {      //SettingsButton
+        background(100, 100, 130);
+        deactivateButton[0] = true;
+        initButtons();
+      }
+    }
   /********************************
   *Shop
   ********************************/
-  else if (e.getSource() ==s_back) {                                          //left Skin
-    SnakeColorSelected--;
-    if(SnakeColorSelected<0)
-      SnakeColorSelected = SnakeColor.length-1;
-    if(boughtItems[SnakeColorSelected] == true){
-      buy.setLabel("\nchoose");
-      fill(100,100,130);
-      noStroke();
-      rect(width/2-width/10,600, width/10, 50);
-      fill(#FFFBA2);
-      text("choose",width/2-width/10,640);
-    }else{
-      buy.setLabel("\nbuy");
-      fill(100,100,130);
-      noStroke();
-      rect(width/2-width/10, 600, width/10, 50);
-      fill(#FFFBA2);
-      text("Buy",width/2-width/10,640);
+  if(deactivateButton[2] == false){      
+    if (s_back.isFired()) {                                          //left Skin
+      SnakeColorSelected--;
+      if(SnakeColorSelected<0)
+        SnakeColorSelected = SnakeColor.length-1;
+      if(boughtItems[SnakeColorSelected] == true){
+        buy.text="\nchoose";
+      }else{
+        buy.text="\nbuy";
+      }
+      buy.DrawButton();
     }
-  }
-  else if (e.getSource() ==s_forward) {                                        //right skin
-    SnakeColorSelected++;
-    if(SnakeColorSelected>=SnakeColor.length)
-      SnakeColorSelected = 0;
-    if(boughtItems[SnakeColorSelected] == true){
-      buy.setLabel("\nchoose");
-      fill(100,100,130);
-      noStroke();
-      rect(width/2-width/10,600, width/10, 50);
-      fill(#FFFBA2);
-      text("choose",width/2-width/10,640);
-    }else{
-      buy.setLabel("\nbuy");
-      fill(100,100,130);
-      noStroke();
-      rect(width/2-width/10, 600, width/10, 50);
-      fill(#FFFBA2);
-      text("Buy",width/2-width/10,640);
+    else if (s_forward.isFired()) {                                        //right skin
+      SnakeColorSelected++;
+      if(SnakeColorSelected>=SnakeColor.length)
+        SnakeColorSelected = 0;
+      if(boughtItems[SnakeColorSelected] == true){
+        buy.text = "\nchoose";
+      }else{
+        buy.text = "\nbuy";
+      }
+      buy.DrawButton();
     }
-  }
-  else if (e.getSource() ==buy) {                                              //BuyButton
-    buySkin();
-  }
-  else if (e.getSource() == backShop){                                         //shop->overview
-    background(100, 100, 130);
-    Menu.setVisible(true);
-    ShopHandler.setVisible(false);
-    SnakeColorSelected = SnakeNormalColor;
-    shopmenu = false;
-    deactivateButton[0] = false;
+    else if (buy.isFired()) {                                              //BuyButton
+      buySkin();
+    }
+    else if (backShop.isFired()){                                         //shop->overview
+      background(100, 100, 130);
+      initButtons();
+      SnakeColorSelected = SnakeNormalColor;
+      shopmenu = false;
+      deactivateButton[0] = false;
+    }
   }
   /********************************
   *levelSettings
   ********************************/
-  else if (e.getSource() == back) {                                            //level->overview
-    lvls.lvlSelect = -1;
-    deactivateButton[1] = true;
-    deactivateButton[0] = false;
-    lvlSettings.setVisible(false);
-    backHandler.setVisible(false);
-    background(100, 100, 130);
-    Menu.setVisible(true);
-  }
-  else{                                                                        //level selector
-    if(deactivateButton[1] == false){
+  
+  else if(deactivateButton[1] == false){                                                                             //level selector
       for(int i=0;i<lvl.maxLvl;i++){
         if(i>=maxLevel)
           return;
-        if (e.getSource() == levels[i]) {
+        if (levels[i].isFired()) {
           deactivateButton[1] = true;
           lvls.lvlSelect = byte(i+1);
-          lvlSettings.setVisible(false);
-          backHandler.setVisible(false);
           SetupSnake();
           GameStart = true;
         }
       }
+      if(back.isFired()) {                                            //level->overview
+        lvls.lvlSelect = -1;
+        deactivateButton[1] = true;
+        deactivateButton[0] = false;
+        background(100, 100, 130);
+        initButtons();
+      }
     }
-  }
-}
+  
+   
+ }
+ 
 
 void levelSettingsInit(){
-  Menu.setVisible(false);
   deactivateButton[1] = false;
   background(125);
-  lvlSettings = new GUIController(this);
-  backHandler = new GUIController(this);
   
-  back = addButton(this,backHandler,back,"\nBack",width/2-125,height-150,250,50);
+  back = new Button(width/2-125,height-150,"\nBack");
   
-  //lvls.start();
   lvls.getLatestLevel();
-  lvlSettings.setVisible(false);
   for(int i=0;i<lvl.maxLvl;i++){
      int x = width/40+width/4*(i%4); //<>// //<>// //<>//
      int y = 100*floor((i+4)/4)+height/10*floor(i/4);
-     levels[i] = addButton(this,lvlSettings,levels[i],"level "+i,x,y,width/5,height/10);
+     levels[i] = new Button(x,y+height/10,width/5,height/10,"level "+i, 0);    //x1,y1,x2,y2,text,opacity
      
      String test = str(i+1);
      img[i] = loadImage("/data/lvlpics/lvl"+test+".png");
@@ -156,17 +207,13 @@ void levelSettingsInit(){
 }
 
 void shopMenu(){
-  ShopHandler = new GUIController (this);
+  deactivateButton[2] = false;
+  s_back = new Button(width/10, 500-20,width/10, 30,"\nBack", 0);
+  s_forward = new Button(8*width/10, 500-20, width/10, 30,"\nNext",0);
+  buy = new Button( width/2-width/10, 600,"\nBuy");
   
-  s_back = addButton(this,ShopHandler,s_back,"\nBack", width/10, 500-20, width/10, 40);
-  s_forward = addButton(this,ShopHandler,s_forward,"\nNext", 8*width/10, 500-20, width/10, 40);
-  buy = addButton(this,ShopHandler,buy,"\nBuy", width/2-width/10, 600, width/10, 40);
-  
+  backShop = new Button(width/2-width/3, 600,"\nBack");
 
-  ShopHandler.showBounds = true;
-  backShop = addButton(this,ShopHandler,backShop,"\nBack", width/2-width/3, 600, width/10, 40);
-
-  ShopHandler.setVisible(false);
   SnakeNormalColor = SnakeColorSelected;
   fill(0);
   
@@ -175,9 +222,7 @@ void shopMenu(){
   textSize(30);
   fill(#FFFBA2);
   text("Costs 5000 food",width/2-150,400);
-  text("Buy",width/2-width/10,640);
   text(maxFood+" food",width/10,100);
-  text("Startseite",width/2-width/3,640);
 }
 
 void showSnake(){
@@ -204,7 +249,7 @@ void showSnake(){
 }
 
 void buySkin(){
-   if(buy.getLabel()=="\nchoose"){
+   if(buy.text=="\nchoose"){
        SnakeNormalColor = SnakeColorSelected;
        boughtItems[SnakeColorSelected] = true;
        datahandler.savetoJson();
@@ -214,17 +259,7 @@ void buySkin(){
        SnakeNormalColor = SnakeColorSelected;
        boughtItems[SnakeColorSelected] = true;
        datahandler.savetoJson();
-       buy.setLabel("\nchoose");
+       buy.text="\nchoose";
      }  
    }
-}
-
-/*******************************
-*Adds Button to guicontroller
-*******************************/
-IFButton addButton(Object meh,GUIController ctrl, IFButton btn, String label, int x1,int y1,int x2,int y2){
-  btn = new IFButton (label, x1, y1, x2, y2);
-  btn.addActionListener(meh);
-  ctrl.add (btn);
-  return btn;
 }

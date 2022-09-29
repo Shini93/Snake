@@ -49,20 +49,20 @@ class PrimalSnake{
   void testWalls(){
     //testWalls
     if(wallteletime > 2){
-      if(body.get(0).pos[0] <= marginX || body.get(0).pos[1] <= marginY || body.get(0).pos[0] >= width-2*marginX || body.get(0).pos[1] >= height-2*marginY){
+      if(body.get(0).pos[0] <= marginX || body.get(0).pos[1] <= marginY || body.get(0).pos[0] >= WorldSizeX-2*marginX || body.get(0).pos[1] >= WorldSizeY-2*marginY){
         if(body.get(0).pos[0] <=0){
-          teleport(width-2*marginX,body.get(0).pos[1]);
+          teleport(WorldSizeX-2*marginX,body.get(0).pos[1]);
           wallteletime=0;
         }
         if(body.get(0).pos[1] <=0){
-          teleport(body.get(0).pos[0],height-2*marginY); 
+          teleport(body.get(0).pos[0],WorldSizeY-2*marginY); 
           wallteletime=0;
         }
-        if(body.get(0).pos[0] >=width-2*marginX){
+        if(body.get(0).pos[0] >=WorldSizeX-2*marginX){
           teleport(0,body.get(0).pos[1]); 
           wallteletime=0;
         }
-        if(body.get(0).pos[1] >= height-2*marginY){
+        if(body.get(0).pos[1] >= WorldSizeY-2*marginY){
           teleport(body.get(0).pos[0],0);  
           wallteletime=0;
         }
@@ -87,6 +87,7 @@ class PrimalSnake{
           maxFood+=food.get(i).value;
           food.get(i).reset();
           fillGridsFood();
+          DrawFood();
         }
         
       }
@@ -112,8 +113,8 @@ class PrimalSnake{
       if(isAndroid == false){
        // if(mouseX-pmouseX!=0 && mouseY-pmouseY!=0)  //snake moves always in the same direction
          if(id == 0){
-          NewDirectionX = int(mouseX/ScaleScreenX+body.get(0).pos[0]-width/2);
-          NewDirectionY = int(mouseY/ScaleScreenY+body.get(0).pos[1]-height/2);
+          NewDirectionX = round(mouseX/ScaleScreenX+body.get(0).pos[0]-width/2);
+          NewDirectionY = round(mouseY/ScaleScreenY+body.get(0).pos[1]-height/2);
           Angle = math.Anglecalc(body.get(0).pos[0],body.get(0).pos[1],NewDirectionX,NewDirectionY);
          }
           else if (id == 1){
@@ -131,8 +132,9 @@ class PrimalSnake{
       
     }
    
-    newpos[0] = int(body.get(0).pos[0]-FieldSize*speedSnake*math.cosAlike(Angle));
-    newpos[1] = int(body.get(0).pos[1]-FieldSize*speedSnake*math.sinAlike(Angle));
+    newpos[0] = round(body.get(0).pos[0]-FieldSize*speedSnake*math.cosAlike(Angle));
+    newpos[1] = round(body.get(0).pos[1]-FieldSize*speedSnake*math.sinAlike(Angle));
+    
     oldAngle = Angle;
   }
   
@@ -147,8 +149,8 @@ class PrimalSnake{
     }
 
     
-    body.get(0).pos[0] = int(newpos[0]);
-    body.get(0).pos[1] = int(newpos[1]);
+    body.get(0).pos[0] = (newpos[0]);
+    body.get(0).pos[1] = (newpos[1]);
 
     Calcsize();
     FieldSize = size*0.7;   

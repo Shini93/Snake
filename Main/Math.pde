@@ -118,32 +118,38 @@ float sinS(float Angle){
   }
 
 
- void DashedLine(int x1,int y1, int x2, int y2){
+ int[][] DashedLine(int x1,int y1, int x2, int y2){
+   int spacing = 20;
+   int linelength = 10;
+   int[][] Dots = new int[ceil(dist(x1,y1,x2,y2)/(spacing+linelength))][4];
+     int mulx = 1;
+     int muly = 1;
      if ( x1 > x2){
-        int x3 = x1;
-        x1 = x2;
-        x2 = x3;
+        mulx=-1;
      }
      if ( y1 > y2){
-        int y3 = y1;
-        y1 = y2;
-        y2 = y3;
+        muly = -1;
      }
-     int spacing = 10;
-     int linelength = 10;
-     
-     int dx = abs(x1-x2);
-     int dy = abs(y1-y2);
+     int dx = mulx*abs(x1-x2);
+     int dy = muly*abs(y1-y2);
      float distance = dist(x1,y1,x2,y2);
      float intersections = distance/(spacing+linelength);
      for(int i=0;i<intersections;i++){
        float x0 = x1+(i/intersections)*dx;
        float y0 = y1+(i/intersections)*dy;
-       SnakeGraphic.line(x0,
-            y0,
-            x0+linelength*(dx/distance),
-            y0+linelength*(dy/distance));
+       if(dist(x0,y0,x2,y2) > dist(x0,y0,x0+linelength*(dx/distance),y0+linelength*(dy/distance))){
+         pg_Lines.line(x0,
+              y0,
+              x0+(linelength*(dx/distance)),
+              y0+(linelength*(dy/distance)));
+       }
+       //Dots[i][0] = int(x0);
+       //Dots[i][1] = int(y0);
+       //Dots[i][2] = int(x0+(linelength*(dx/distance)));
+       //Dots[i][3] = int(y0+(linelength*(dy/distance)));
+
      }
+     return Dots;
   }
 
 }

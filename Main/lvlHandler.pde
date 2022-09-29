@@ -1,27 +1,38 @@
+/*******************
+*Handles the levels
+*******************/
 class lvlHandler{
-  lvlReader reader = new lvlReader();
-  byte actualLevel = 1;
-  byte Killcount = 0;
-  byte lvlSelect = -1;
+  lvlReader reader = new lvlReader();        //Reads the actual level from the file
+  byte actualLevel = 1;                      //defaultlevel
+  byte Killcount = 0;                        //default deaths
+  byte lvlSelect = -1;                       //default lvl select
   lvlHandler(){
     
   }
+  
+  /****************
+  *lvl finished
+  *saves progress
+  ****************/
   void victory(){
-    if(snake[0].SLength>=lvl.winsize){
-       if(actualLevel < lvl.maxLvl){
-         actualLevel++;
-         if(actualLevel > maxLevel)
-           maxLevel++;
-         deactivateButton[0] = false;
-         datahandler.savetoJson();
-         reset();
-         GameStart = false;
-         //Menu.setVisible(true);
-         
-        // datahandler.savetoFile("maxFood",str(maxFood));
+    if(snake[0].SLength>=lvl.winsize){            //when snake has a set size, the level is won.
+       if(actualLevel >= lvl.maxLvl){             //nothing happens if highest lvl is reached.
+         return;
        }
+       actualLevel++;
+       if(actualLevel > maxLevel)
+         maxLevel++;                              //maximum reached lvl updated
+       deactivateButton[0] = false;
+       datahandler.savetoJson();                  //saves to file
+       reset();                                   //resets all states
+       GameStart = false;
     }
   }
+  
+  /*********************
+  *starts start lvl
+  *fills lvl with Blocks
+  **********************/
   void start(){
     lvl.maxLvl = reader.getlatestLevel();
     //reader.readData();
@@ -32,18 +43,21 @@ class lvlHandler{
       lvl.callBlocks(byte(lvlSelect),reader.readData()); 
     }
   }
+  
+  /***** gets last unlocked level *****/
   void getLatestLevel(){
    lvl.maxLvl = reader.getlatestLevel(); 
   }
+  
+  /****** resets the level to load a new one ******/
   void reset(){
- //   reader = new lvlReader();
     food.clear();
     for(int i=0;i<snake.length;i++){
       snake[i] = new Snake(false, int(random(800)), int(random(800)),i);
     }
     blocks.clear();
     specials.clear();
-    lvl.blocksize=0;
+    lvl.count=1;
     for(Snake s : snake){
       s.missile = new Missiles();
     }
@@ -51,12 +65,14 @@ class lvlHandler{
     lvl.setPortal = false;
     Killcount++;
     //StepMovingBlock = 0;
-    movingtiles.reset();
+    for ( int i=0; i<3;i++)
+      if(movingtiles[i] != null)
+        movingtiles[i].reset();
     SetupSnake();
   }
   
   void setlvl(byte level){
-    lvl.callBlocks(level,reader.readData());
+    lvl.callBlocks(level,reader.readData()); //<>//
   }
   
 }
