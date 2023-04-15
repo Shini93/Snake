@@ -1,179 +1,139 @@
-/***************
+/*************** //<>// //<>//
  *Global
  ***************/
+//Add fodfunction ->green,blue,yellow,red
+//Add Portal (1 and 2)
 ArrayList <Integer> blocksx = new ArrayList<Integer>();
 ArrayList <Integer> blocksy = new ArrayList<Integer>();
+int ImouseX = mouseX;
+int ImouseY = mouseY;
+
 int[] snake = new int[2];
 int[][] BlockLine = new int[1000][2];
-int scale = 30;
+int[][] Tele = new int[1000][2];
+int[][] Food = new int[1000][2];
+int scale = 30;            //rastersize
+int timer = 0;             
+int chosenLevel = 0;       //level to see
+int maxMovingLine = 0;       //
+int maxPortal = 0;      //Portal
+int maxFood = 0;      //Portal
+int countMirror = 0;
+
+PVector World = new PVector(1920*2,1080*2);
+
+boolean MirrorOn = false;
 boolean Mousepressed = false;
-int timer = 0;
+boolean lvlloaded, willDraw = false;      //willdraw: save image
 byte switchKey = 0;
-String Mode = "Blocks";
-int chosenLevel = 0;
+
+String Mode = "Blocks";          //chosenMode
+
 FileHandler filehandler = new FileHandler();
-boolean lvlloaded,willDraw = false;
-int chosenPoint = 0;
 PGraphics noLines;
+float scaleFact = 1;
 
 void setup() {
   fullScreen(1);
+  //scaleFact = (min(width/World.x,height/World.y));
+  World.x = round(width/scaleFact);
+  World.y = round(height/scaleFact);
+  //size(300,300);
   background(125);
-  noLines = createGraphics(width,height);
-  for(int i=0;i<100;i++){
-    BlockLine[i][0] = -10;
-    BlockLine[i][1] = -10;
+  textSize(25);
+  noLines = createGraphics(round(World.x), round(World.y));
+  chosenLevel = filehandler.getlatestLevel()+1;
+  
+  /*Init arrays*/
+  for (int i=0; i<1000; i++) {              //Blocklines to 0
+    for (int j=0; j<2; j++) {              //Blocklines to 0
+      BlockLine[i][j] = -10;
+      Tele[i][j] = -10;
+      Food[i][j] = -10;
+    }
   }
+}
+void BlocksFood(){
+  addBlock();    //adds Block to Array
+  addFood();    //adds Block to Array
   
 }
-
 void draw() {
   background(125);
+  resetScreen();
+  ImouseX = round(mouseX/scaleFact);
+  ImouseY = round(mouseY/scaleFact);
+  drawLines();
   
-  noLines.beginDraw();
-  noLines.clear();
-  noLines.fill(125);
-  noLines.rect(0, 0, width, height);
-  noLines.fill(#FFFFFF);
-  if (Mousepressed && Mode == "Blocks") {
-    int xscaled = 0;
-    int yscaled = mouseY;
-    xscaled = round(mouseX/scale)*scale;
-    yscaled = round(mouseY/scale)*scale;
-    boolean exists = false;
-    for (int i=blocksx.size()-1; i>=0; i--) {
-      if (blocksx.size() > 0 && blocksx.get(i) == xscaled && blocksy.get(i) == yscaled) {
-        exists = true;
-        if (keyPressed && key=='d') {
-          blocksx.remove(i);
-          blocksy.remove(i);
-        }
-      }
-    }
-    
-    if (exists == false && keyPressed==false) {
-      blocksx.add(xscaled);
-      blocksy.add(yscaled);
-    }
-  }
-  for (int i=0; i<blocksx.size(); i++) {
-    {
-      noLines.rect(blocksx.get(i), blocksy.get(i), scale, scale);
-    }
-      noLines.fill(#00FFFF);
-      noLines.circle(snake[0],snake[1],10);
-      noLines.fill(#FFFFFF);
-  }
-  if (Mode == "movingBlockLine") {
-    int xscaled = 0;
-    int yscaled = 0;
-    xscaled = round(((mouseX+scale/2)/scale))*scale;
-    yscaled = round(((mouseY+scale/2)/scale))*scale;
-    noLines.circle(xscaled,yscaled,5);
-  }
-  int start = 0;
-  if(chosenPoint > 10){
-   println("meh");  //<>//
-  }
+  //noLines.scale(0.5);
+  BlocksFood();
   
-  
-  for(int i=0;i<chosenPoint-1;i++){
-    boolean startfound = false;
-    noLines.stroke(0);
-    if(i>start && BlockLine[i][0] == BlockLine[start][0] && BlockLine[i][1] == BlockLine[start][1]){
-      start = i+1;
-      startfound = true;
-    }
-    if(BlockLine[0][0] != -10 && startfound == false)
-      noLines.line(BlockLine[i][0],BlockLine[i][1],BlockLine[i+1][0],BlockLine[i+1][1]);
+  if(MirrorOn == true){
+  //  scale(scaleFact);
+    ImouseX = round(World.x- (  mouseX / scaleFact));
+    BlocksFood();
+    ImouseY = round(World.y - (mouseY / scaleFact));
+    BlocksFood();
+    ImouseX = round(mouseX/scaleFact);
+    BlocksFood();
   }
-  image(noLines,0,0);
-  
-  if(willDraw == false){
+  drawBlock();      //draws on screen
+  drawFood();      //draws on screen 
+  addMovingBlock();
+  drawMovingTiles();
+  addTele();
+  drawTele();
+  image(noLines, 0, 0);
+
+  if (willDraw == false) {
     noLines.textSize(25);
     noLines.fill(0);
-    noLines.text("P: print Blocks \nZ: undo Blocks \nR: reverse Blocks\nD+Click: delete hovered Block \nS: saves the blocks to a local file \nL: changes level\nNumberBlocks: "+blocksx.size()+"\nMode: "+Mode+"\nchosenLevel: "+chosenLevel, 0, 30);
+    noLines.text("P: print Blocks \nZ: undo Blocks \nR: reverse Blocks\nD+Click: delete hovered Block \nS: saves the blocks to a local file \nL: changes level\nNumberBlocks: "
+      +blocksx.size()+"\nMode: "
+      +Mode+"\nchosenLevel: "
+      +chosenLevel+ "\n M: Mirror: "
+      +MirrorOn+"\n +- Zoom"+"\n Width = "
+      +World.x+"   height = "+World.y, 0, 30);
   }
   willDraw = false;
   noLines.endDraw();
-  image(noLines,0,0);
+  image(noLines, 0, 0);
+  
+}
+
+void resetScreen() {
+  noLines.beginDraw();
+  noLines.clear();
+  noLines.fill(#FFFFFF);
+}
+
+void drawLines(){
   fill(0);
-  line(0,mouseY,width,mouseY);
-  line(mouseX,0,mouseX,height);
+  strokeWeight(1);
+  //waagerechte linie
+  line(0, mouseY, round(width), mouseY);
+  //senkrechte Linie
+  line(mouseX, 0, mouseX, round(height));
+  strokeWeight(3);
+  //Fadenkreuz Mitte Bildschirm
+  line(round(width)/2,0,round(width)/2,round(height));
+  line(0,round(height)/2,round(width),round(height)/2);
+  strokeWeight(1);
+  stroke(100);
+  for(int i=0;i<ceil(round(World.x)/scale)+1;i++){
+    line(i*scale*scaleFact,0,i*scale*scaleFact,round(height));
+  }
+  for(int i=0;i<ceil(round(World.y)/scale)+1;i++){
+    line(0,i*scale*scaleFact,round(width),i*scale*scaleFact);
+  }
+  stroke(0);
 }
 
-void mousePressed() {
-  Mousepressed = !Mousepressed;
-  if(Mode == "Snake"){
-     snake[0] = mouseX;
-     snake[1] = mouseY;
-  }
-  else if(Mode == "movingBlockLine"){
-    int xscaled = 0;
-    int yscaled = 0;
-    xscaled = round((mouseX+scale/2)/scale)*scale;
-    yscaled = round((mouseY+scale/2)/scale)*scale;
-     BlockLine[chosenPoint][0] = xscaled;
-     BlockLine[chosenPoint][1] = yscaled;
-     chosenPoint++;
-  }
-}
-void mouseReleased() {
-  Mousepressed = !Mousepressed;
-}
-void keyPressed() {
-  if (key =='p' || key == 'P') {             //print current blocks to console.
-    print("\nx:\n"+blocksx);
-    print("\ny:\n"+blocksy);
-  } else if (key =='z' || key == 'Z') {      //Undo last move
-    blocksx.remove(blocksx.size()-1);
-    blocksy.remove(blocksy.size()-1);
-  } else if (key =='r' || key == 'R') {      //reverse Blocks
-    ReverseBlocks();
-  } else if (key =='S' || key == 's') {      //saves to file
-    filehandler.savetoFile();
-    createImage();
-  }  
-  else if (key ==TAB) {      //saves to file
-    switchKey++;            //0:Blocks, 1:Snake, 2: Food, 3: Portals
-    if(switchKey ==0)
-      Mode = "Blocks";
-    else if(switchKey ==1)
-      Mode = "Snake";
-    else if(switchKey ==2)
-      Mode = "Food";
-    else if(switchKey == 3)
-      Mode = "Portals";
-    else if(switchKey == 4){
-      Mode = "movingBlockLine";
-      switchKey = -1;
-    }
-    
-  }else if (key =='l' || key == 'L') {      //saves to file
-    chosenLevel=1+chosenLevel%int(filehandler.getlatestLevel()); //<>//
-    filehandler.callBlocks(filehandler.readData());
-    lvlloaded = true;
-  }
-}
-
-
-void ReverseBlocks(){
- ArrayList <Integer> dummyX = new ArrayList<Integer>();
-  ArrayList <Integer> dummyY = new ArrayList<Integer>();
-  for (int i=0; i<width/scale+1; i++) {
-    for (int k=0; k<height/scale+1; k++) {
-      boolean exists = false;
-      for (int j=0; j<blocksy.size(); j++) {
-        if ( round((i)*scale) == blocksx.get(j) && round((k)*scale) == blocksy.get(j)) {
-          exists = true;
-        }
-      }
-      if (exists == false) {
-        dummyX.add(round((i)*scale));
-        dummyY.add(round((k)*scale));
-      }
-    }
-  }
-  blocksx = dummyX;
-  blocksy = dummyY; 
+void resetAll(){
+  
+  blocksx.clear();
+  blocksy.clear();
+  maxMovingLine = 0;       //
+  maxPortal = 0;      //Portal
+  maxFood = 0;      //Portal
 }
