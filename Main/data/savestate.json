@@ -1,15 +1,28 @@
-{
-  "maxLevel": 1,
-  "Skin_9": false,
-  "Skin_8": false,
-  "Skin_7": true,
-  "Skin_6": false,
-  "Skin_5": true,
-  "Skin_4": false,
-  "Skin_3": false,
-  "Skin_2": true,
-  "maxFood": 7583,
-  "Skin_1": true,
-  "Skin_0": true,
-  "SnakeColorSelected": 7
-}
+[
+  {
+    "maxLevel": 100,
+    "maxFood": 4482
+  },
+  {
+    "Skin_9": false,
+    "Skin_8": false,
+    "Skin_7": false,
+    "Skin_6": false,
+    "Skin_5": false,
+    "Skin_4": false,
+    "Skin_3": false,
+    "Skin_2": false,
+    "Skin_1": false,
+    "Skin_0": false,
+    "SnakeColorSelected": 0
+  },
+  {
+    "upgradeProcessing": 0,
+    "FurtherSight": 0,
+    "maxRockets": 0,
+    "maxSpeed": 0,
+    "maxMiniSnakes": 0,
+    "MiniMovement": 0,
+    "BroaderSight": 0
+  }
+]

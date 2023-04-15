@@ -14,10 +14,10 @@ class lvlHandler{
   *lvl finished
   *saves progress
   ****************/
-  void victory(){
+  boolean victory(){
     if(snake[0].SLength>=lvl.winsize){            //when snake has a set size, the level is won.
-       if(actualLevel >= lvl.maxLvl){             //nothing happens if highest lvl is reached.
-         return;
+       if(actualLevel >= lvl.maxLvl){             //nothing happens if highest lvl is reached. //<>//
+         return true;
        }
        actualLevel++;
        if(actualLevel > maxLevel)
@@ -26,7 +26,14 @@ class lvlHandler{
        datahandler.savetoJson();                  //saves to file
        reset();                                   //resets all states
        GameStart = false;
+       
+       deactivateButton[0] = false;
+       shopmenu = false;
+       background(125);
+       initButtons();
+       return true;
     }
+    return false;
   }
   
   /*********************
@@ -64,15 +71,14 @@ class lvlHandler{
     portal = new Portal[MaxPortals];
     lvl.setPortal = false;
     Killcount++;
+    grid.clear();
     //StepMovingBlock = 0;
-    for ( int i=0; i<3;i++)
-      if(movingtiles[i] != null)
-        movingtiles[i].reset();
+    movingtiles = new movingTiles[10];
     SetupSnake();
   }
   
   void setlvl(byte level){
-    lvl.callBlocks(level,reader.readData()); //<>//
+    lvl.callBlocks(level,reader.readData());
   }
   
 }

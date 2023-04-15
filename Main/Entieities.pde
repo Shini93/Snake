@@ -16,6 +16,7 @@ class Food {
   int value;                     //How much a snake grows when eating it
   boolean outofBounds = true;    //out of sight from Screen
   
+  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   /********************************
    *Overloaded constructor
    ********************************/
@@ -34,6 +35,7 @@ class Food {
     init();
   }
   
+  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   /**************************************
   *resets the Food and respawns it
   **************************************/
@@ -41,8 +43,8 @@ class Food {
     Boolean overlap = true;            //Must not be inside a block
     while(overlap){
       overlap = false;
-      posx = int(random(WorldSizeX-2*GridSize-2*marginX))+GridSize;
-      posy = int(random(WorldSizeY-2*GridSize-2*marginY))+GridSize;
+      posx = int(random(WorldSizeX));
+      posy = int(random(WorldSizeY));
       for(int i=0;i<blocks.size()-1;i++){
         if(posx>blocks.get(i).pos[0] && posx<blocks.get(i).pos[0]+blocks.get(i).size){
           if(posy>blocks.get(i).pos[1] && posy<blocks.get(i).pos[1]+blocks.get(i).size){
@@ -60,6 +62,7 @@ class Food {
     init();
   }
   
+  //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   /**************************************
   *defines the parameters
   **************************************/
@@ -84,6 +87,7 @@ class Food {
   }
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /****************************
 *Block class
 *Blocks defined in lvl system
@@ -113,7 +117,7 @@ class Blocks{
   }
 }
 
-
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class movingTiles{
   int blockID;
   int[][] Path = new int[20][2];
@@ -131,5 +135,8 @@ class movingTiles{
   void reset(){
     rectcorner=0;
     StepMovingBlock=0;
+    int[][] dummy = new int[20][2];
+    Path = dummy;
+    maxCorner = 0;
   }
 }

@@ -17,6 +17,7 @@ class PrimalSnake{
   int wallteletime = 0;
   int lastBody = SLength;
   int id;
+  int targetFood = -1;
   
   ArrayList <SnakeBody> body = new ArrayList <SnakeBody>();
   float speedSnake = 1;
@@ -105,9 +106,13 @@ class PrimalSnake{
     //oldAngle = Anglecalc(body.get(1).pos[0],body.get(1).pos[1],body.get(0).pos[0],body.get(0).pos[1]);
  
     if(NPC == true){
-      Angle = oldAngle+random(PI/10)-PI/20;
-      if(millis()%10 == 0 || millis()%11 == 0 || millis()%12 == 0)
-        Angle = oldAngle+random(PI/2)-PI/4;
+      //Angle = 2*PI*noise(0.001*millis());
+      if(targetFood == -1)
+        targetFood = round(random(food.size()));
+      if(dist(body.get(0).pos[0],food.get(targetFood).posx,body.get(0).pos[1],food.get(targetFood).posy) <= size)
+        targetFood = round(random(food.size()));
+      float AngleFood = math.Anglecalc(body.get(0).pos[0],body.get(0).pos[1],food.get(targetFood).posx,food.get(targetFood).posy);
+      Angle = AngleFood;
     }
     else if(NPC == false){
       if(isAndroid == false){

@@ -61,6 +61,36 @@ class UpgradeHandler{
       //glow lights up parts where snake is
     }
   }
+  
+  //--------------------------------------------------------------------------------------------
+  //Gets upgrade from shop and adds it to ingame
+  float boughtUpgradeMultiplicator(int upgrade){
+    switch(upgrade){
+      //Speed
+      case 0:
+        return 1+boughtUpgrades[upgrade]*0.01;   //speed gets greater for 0.01 per lvl
+      //Number Rockets
+      case 1:
+        return boughtUpgrades[upgrade];  //starting with 0 rockets, each upgrade adds 1 additional rocket
+      //Number mini Snakes
+      case 2:
+        return boughtUpgrades[upgrade];  //starting with 0 additional mini snakes, each upgrade adds 1 mini snake
+      //Faster movement of mini snakes
+      case 3:
+        return 1+ boughtUpgrades[upgrade] * 0.01;  //movement speed, amplitude and frequency of mini snakes speed
+      //speed of updates to process from eating to updates to eat
+      case 4:
+        int x = boughtUpgrades[upgrade];
+        return 0.005 * x * x - 0.2 * x + 3;  //starting with 3 frames per bodypart. Decreases by some amount per lvl max lvl 20 in this config
+      //how far we can see
+      case 5:
+        return 1 + boughtUpgrades[upgrade] * 0.1; //seeing further with each upgrade about 0.1% per lvl
+      //broader side
+      case 6:
+        return boughtUpgrades[upgrade] * (PI/90); //2 degree per lvl more to see
+    }
+    return 0.0;
+  }
 
   void PreUpdate(){
     for(int i = 0; i<10;i++){

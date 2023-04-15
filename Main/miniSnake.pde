@@ -17,7 +17,7 @@ class miniSnake extends PrimalSnake{
   }
   
   @Override
-  void nextTile() {
+  public void nextTile() {
     body.get(0).pos[0] = snake[snakeID].body.get(0).pos[0]      //snakeHead Main
       -int((distancesindelta                                    //distance to snakeHead Main
           *math.sinS(distanceAngledelta)+distanceSnake)                //frequency
@@ -27,12 +27,12 @@ class miniSnake extends PrimalSnake{
   }
   
   @Override
-  void Calcsize(){
+  public void Calcsize(){
    size=5; 
   }
   
   @Override
-  void testFood(){
+  public void testFood(){
    //TestFood
    newpos[0] = body.get(0).pos[0];
    newpos[1] = body.get(0).pos[1]; //<>//

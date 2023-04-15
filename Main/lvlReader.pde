@@ -2,6 +2,7 @@ class lvlReader {
   lvlReader() {
   }
 
+
   int[][] readData() {
     String path = "level/Lvl"+lvls.actualLevel+".txt";
     if(isAndroid == false)
@@ -15,50 +16,64 @@ class lvlReader {
         while ((line = reader.readLine()) != null) {
           pieces += line;
         }
-        boolean counterStart = false;
-        boolean SnakeFinish = false;
-        boolean countblockP = false;
+        char lastSpecialChar = ' ';
+        /*read out the data*/
         for (int i=0; i<pieces.length(); i++) {
-          if (pieces.charAt(i)=='!' && SnakeFinish == false) {      //starts with x seperated from ;
-            i++;
-            counterStart = true;
-          }
-          if (pieces.charAt(i)=='~') {      //starts with x seperated from ;
-            SnakeFinish = true;
-            i++;
-            counterStart = true;
-          }
-          if (counterStart) {
-            String Number = "";
-            while (pieces.charAt(i)!=';') {
-              Number += pieces.charAt(i);
-              i++;
+          if (pieces.charAt(i)=='!' || pieces.charAt(i)=='~' || pieces.charAt(i)=='#' || pieces.charAt(i)=='§' || pieces.charAt(i)=='$'){
+            lastSpecialChar = pieces.charAt(i);
+          }else{
+            ArrayList <Integer> dummyList = new ArrayList <Integer>();
+            while(i<pieces.length()-1 && (pieces.charAt(i)!='!' && pieces.charAt(i)!='~' && pieces.charAt(i)!='#' && pieces.charAt(i)!='§' && pieces.charAt(i)!='$')){
+              String Number = "";
+              while (pieces.charAt(i)!=';') {
+                Number += pieces.charAt(i);
+                i++;
+              }
+              if(i<pieces.length()-1)
+                i++;
+              dummyList.add(int(Number));
             }
-            allPos.add(int(Number));
-          }
-          if (i+1<pieces.length() && pieces.charAt(i+1)=='#') {
-            countblockP = true;
-            counterStart = false;
-            i+=2;
-          }
-          if(countblockP == true){
-           String Number = "";
-            while (pieces.charAt(i)!=';') {
-              Number += pieces.charAt(i);
-              i++;
+            if(lastSpecialChar == ' '){
+              WorldSizeX = dummyList.get(0); 
+              WorldSizeY = dummyList.get(1); 
+              println("World: "+WorldSizeX+";  y"+WorldSizeY);
             }
-            allPoint.add(int(Number)); 
+            else if(lastSpecialChar == '!'){
+                allPos = dummyList;
+                snake[0].body.get(0).pos[0] = dummyList.get(0);
+                snake[0].body.get(0).pos[1] = dummyList.get(1);
+            } else if(lastSpecialChar == '~'){
+              for(int j=0;j<dummyList.size();j++)
+                allPos.add(int(dummyList.get(j)));
+            }
+            else if(lastSpecialChar == '#'){
+              allPoint = dummyList;
+            }
+            else if(lastSpecialChar == '§'){
+              for(int j=0;j<dummyList.size();j+=2){
+                 food.add(new Food(round(j/2), 1, dummyList.get(j), dummyList.get(j+1)));
+              }
+              
+            }
+            else if(lastSpecialChar == '$'){
+              int[] dummy = new int[dummyList.size()];
+              for(int j=0;j<dummyList.size();j++){
+                 dummy[j] = dummyList.get(j);
+              }
+              lvl.AddPortal(dummy);
+            }
+            lastSpecialChar = pieces.charAt(i);
           }
         }
+        
         reader.close();
+        println("reader worked");
       }
       catch (IOException e) {
         e.printStackTrace();
       }
-    
 
-
-    int BlockPos[][] = new int[allPos.size()+3][2];
+    int BlockPos[][] = new int[allPos.size()/2][2];
     int k=0;
     for (int i=0; i<allPos.size(); i+=2) {
       BlockPos[k][0] = allPos.get(i);
@@ -66,13 +81,18 @@ class lvlReader {
       k++;
     }
     if(allPoint.size()>0){
+      int dummy[][] = new int[30][2];
+      for(int i=0;i<30;i++){
+        dummy[i][0] = -1;
+        dummy[i][1] = -1;
+      }
         maxMTiles=0;
         boolean out = false;
         int start = 0;
         int count = -1;
         while(out == false){
-          BlockPos[k][0] = allPoint.get(start);
-          BlockPos[k][1] = allPoint.get(start+1);
+          dummy[count+1][0] = allPoint.get(start);
+          dummy[count+1][1] = allPoint.get(start+1);
           k++;
           boolean innerout = false;
           int z=0;
@@ -97,7 +117,18 @@ class lvlReader {
           count++;
           maxMTiles++;
           movingtiles[count] = new movingTiles(count,movingBlocks);
-        } //<>//
+        }
+        int[][] dummy2 = BlockPos;
+         BlockPos = new int[allPos.size()/2+count+1][2];
+         for(int i=0;i<dummy2.length;i++){
+            BlockPos[i][0] = dummy2[i][0];
+            BlockPos[i][1] = dummy2[i][1];
+         }
+        for(int i=0;i<count+1;i++){
+            BlockPos[i+allPos.size()/2][0] = dummy[i][0];
+            BlockPos[i+allPos.size()/2][1] = dummy[i][1];
+        }
+          
     }
     return BlockPos;
   }

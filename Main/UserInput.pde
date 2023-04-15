@@ -44,6 +44,7 @@ void keyPressed(){
      GameStart = false;
      deactivateButton[0] = false;
      shopmenu = false;
+     lvls.reset(); //<>//
      background(125);
      key = 0;
      initButtons();

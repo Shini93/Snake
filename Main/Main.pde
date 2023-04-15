@@ -1,34 +1,36 @@
 //TODO: Modus wo alle x secunden y schlangenteile sterben, der letzte gewinnt //<>// //<>// //<>//
 //TODO: alle x futter, wird ein giftiges ausgekackt, was einen teile nimmt, zersetzt sich nach einiger Zeit
 
-//import processing.javafx.*;
-
-
+import processing.javafx.*;
 
 /***********************************
-*TODO:
-*statt boundary die Map wiederholen?
-*erstmal ohne shader programmieren
-*Maplvl machen
-*refactoring
-*grafik erstellen, was mit was zusammenhängt und wie oft?
-*shopmenü erstellen
-*auf android lauffähig machen
-*videos aufnehmen beim Programmieren
-*extra PGraphics für Food & specials, für Blöcke (nur einmal zeichnen sollte nötig sein, für schlange, für Linien auf Map)
-**********************************/
+ *TODO:
+ *statt boundary die Map wiederholen?
+ *erstmal ohne shader programmieren
+ *Maplvl machen
+ *refactoring
+ *grafik erstellen, was mit was zusammenhängt und wie oft?
+ *shopmenü erstellen
+ *auf android lauffähig machen
+ *videos aufnehmen beim Programmieren
+ *extra PGraphics für Food & specials, für Blöcke (nur einmal zeichnen sollte nötig sein, für schlange, für Linien auf Map)
+ nullpointer on different machine?
+ **********************************/
 
 void setup() {
-  fullScreen(P2D);
+  fullScreen(FX2D);
   background(BackgroundColor);     //color of interface background
-  MaxGrids = (WorldSizeX*(WorldSizeY)/(GridSize*GridSize));    //Sets the maximum grid size
+  MaxGrids = ceil(WorldSizeX*(WorldSizeY)/(GridSize*GridSize))+1;    //Sets the maximum grid size
   PFont myFont = createFont("Laksaman Bold", sizeFont, true);  //Sets font to be used in the game
   textFont(myFont);
 
   initButtons();      //Adds starting Buttons
+  //datahandler.savetoJson();
   datahandler.readJson();      //reads variables from json like food eaten and snakes bought
+  datahandler.savetoJson();
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*************************************
  *Initialises program
  *************************************/
@@ -39,19 +41,32 @@ void SetupSnake() {
 
   setupMulti();                            //Sets up Multiplayer screen
   lvls.start();                            //starts the first level
+  setupGrid();
+  SnakeGraphic = createGraphics(WorldSizeX, WorldSizeY, FX2D);    //creates canvas on which all will be drawn on
+  drawMovingTilesLines();
 
-  for (int g = 0; g<MaxGrids; g++) {      //init grids
-    grid.add(new GridSystem(g));
+  frameRate(GameSpeed);                    //sets the gamespeed to 30 fps
+  if (shaderOn == true) {
+    myShader = loadShader("data/shader/Block_shader.frag");
+    myShader.set("resolution", float(width), float(height));
+
+    FoodShader = loadShader("data/shader/Food_Shader.frag");
+    FoodShader.set("resolution", float(width), float(height));
+  } else {
+    String[] FoodNames = {"RedDimm.png", "RedBright.png", "GreenDimm.png", "GreenBright.png", "BlueDimm.png", "BlueBright.png", "GoldDimm.png", "GoldBright.png"};
+    for (int i = 0; i < 8; i ++)
+      i_Food[i] = loadImage("img/"+FoodNames[i]);        //foodimages will be loaded once.
   }
-  
-  fillGrids();                            //fills grids with blocks, food and snakebodyparts
-  SnakeGraphic = createGraphics(WorldSizeX, WorldSizeY,P2D);    //creates canvas on which all will be drawn on
-  
-  /****************
-  *Draws Lines once
-  ****************/
-  pg_Lines = createGraphics(WorldSizeX, WorldSizeY,P2D);    //creates canvas on which all will be drawn on
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/****************
+ *Draws Lines once
+ ****************/
+void drawMovingTilesLines() {
+  pg_Lines = createGraphics(WorldSizeX, WorldSizeY, FX2D);    //creates canvas on which all will be drawn on
   pg_Lines.beginDraw();
+
   for (int j = 0; j< movingtiles.length; j++) {
     if (movingtiles[j] == null)
       break;
@@ -65,91 +80,69 @@ void SetupSnake() {
     }
   }
   pg_Lines.endDraw();
-  /***************************/
-  
-  frameRate(GameSpeed);                    //sets the gamespeed to 30 fps
-  
-  if(shaderOn == true){
-    myShader = loadShader("data/shader/Block_shader.frag");
-    myShader.set("resolution", float(width), float(height));
-    
-    FoodShader = loadShader("data/shader/Food_Shader.frag");
-    FoodShader.set("resolution", float(width), float(height));
-  } else{
-    String[] FoodNames = {"RedDimm.png","RedBright.png","GreenDimm.png","GreenBright.png","BlueDimm.png","BlueBright.png","GoldDimm.png","GoldBright.png"};
-    for(int i = 0; i < 8 ; i ++)
-      i_Food[i] = loadImage("img/"+FoodNames[i]);        //foodimages will be loaded once.
-  }
 }
-/**********************************
- *Draws the Canvas
- *opens every GameSpeed interval
- ***********************************/
 
-void draw() {
-   if (shopmenu == true)                  //draws sizzling snake to buy
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/****************
+ *Draws Menu
+ 'Draws Menu Snake
+ *****************/
+boolean drawMenu() {
+  if (shopmenu == true)                  //draws sizzling snake to buy
     showSnake();                         //Draws Snake in Buyscreen
 
   if (GameStart == false) {
     checkFeedback();                    //Checks which Button is pressed
-    return;
+    return true;
   }
-  background(BackgroundColor);
-  text(frameRate, 5, 120);              //Shows Framerate outside the gamescreen
-  
-  
-  lvls.victory();                       //Checks if the level is finished
-  updateSpecialAction();                //Updates missiles, path and minis
-  
-  if (snake[0].dead == true)            //Resets game if player dies
-    lvls.reset();
-    
-  int count = 0;
-  int h = -height/4;
-  if (NumberPlayer==2)
-    h = 0;
-    
-  //Shader     ******************************************************************
-  if(shaderOn == true){
-    int[] pointX = new int[lvl.count];
-    int[] pointY = new int[lvl.count];
-    int[] Glow = new int[4];
-    for(int i=0; i<lvl.count-1; i++){
-      pointX[i] = blocks.get(i).pos[0]+15;
-      pointY[i] = blocks.get(i).pos[1]+15;
-      Glow[i] = blocks.get(i).fade;
-    }
-  
-    myShader.set("pointX", pointX);
-    myShader.set("pointY", pointY);
-    myShader.set("size", blocks.get(0).size); 
-    myShader.set("Glow", Glow);
-  }
+  return false;
+}
 
-  
+void resetSnakeCanvas() {
+  shaderBlocks();
   SnakeGraphic.beginDraw();
-  if(shaderOn == true)
+  if (shaderOn == true)
     SnakeGraphic.shader(myShader);
   //SnakeGraphic.shader(FoodShader);
   SnakeGraphic.noStroke();
   SnakeGraphic.fill(BackgroundColor);
-  SnakeGraphic.rect(0,0,width,height);
+  SnakeGraphic.rect(0, 0, WorldSizeX, WorldSizeY);
   //SnakeGraphic.resetShader();
-  if(shaderOn == true)
+  if (shaderOn == true)
     SnakeGraphic.resetShader();
-    
-  /*************************
-  *Translate screen for every player playing
-  *************************/
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*************************
+ *Translate screen for every player playing
+ *************************/
+void translateCanvasPlayer(int count, int h) {
   for (int Player=0; Player<NumberPlayer; Player++) {
     translateMultiplayer(Player, count, h);      //translates the snake to the middle of players screen
-    updateRays(Player);                          //Draws Rays from each Player
+   // updateRays(Player);                          //Draws Rays from each Player
     snake[Player].upgrades.update();             //Upgrades position of eaten upgrade in Snake
     if (NumberPlayer != 1) {                     //reverts the transformation back to state 0
       popMatrix();
       popMatrix();
     }
   }
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/******************************
+ *Updates all game related stuff
+ *Draws all gamerelated Stuff
+ ******************************/
+void updateGame() {
+  updateSpecialAction();                //Updates missiles, path and minis
+  if (snake[0].dead == true)            //Resets game if player dies
+    lvls.reset();
+  int count = 0;
+  int h = -height/4;
+  if (NumberPlayer==2)
+    h = 0;
+  resetSnakeCanvas();
+  translateCanvasPlayer(count, h);
 
   /****************
    *Draws the Screen
@@ -160,27 +153,42 @@ void draw() {
   DrawMissile();        //Draws all missiles
   DrawPath();           //Draws all missile Paths -> should be integrated in DrawMissile!
   DrawBlocks();         //Draws all Blocks
+  DrawFlash();
   DrawPortal();         //Draws all Portals
   UpdateMovingTiles();  //Draws all moving Blocks
   //DrawGlow();            //Draws Glow of all Snakes
-  
+
   SnakeGraphic.endDraw();
   fill(255);
   DrawCanvas(count, h);  //Draws the screen
   SnakeGraphic.clear();  //Deletes saved canvas
-//  DrawMultiSep();        //Draws Seperation line for all player
-  DrawCursor();          //Draws Cursor if android mode is true -> Search a way that it does not have to be asked every frame
- //println(frameRate);
- DrawText();                           //Writes Text (Food, kills etc.) on screen
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/**********************************
+ *Draws the Canvas
+ *opens every GameSpeed interval
+ ***********************************/
+void draw() {
+  if (drawMenu() == true)
+    return;
+  //Checks if the level is finished
+  if (lvls.victory() == true)
+    return;
+  updateGame();
+  //  DrawMultiSep();        //Draws Seperation line for all player
+  DrawCursor();          //Draws Cursor if android mode is true -> Search a way that it does not have to be asked every frame
+  //println(frameRate);
+  DrawText();                           //Writes Text (Food, kills etc.) on screen
+}
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /******************************
-*Updates Snakes position
-*Updates missiles
-*Updates missile Paths
-*Updates mini Snakes positions
-*******************************/
+ *Updates Snakes position
+ *Updates missiles
+ *Updates missile Paths
+ *Updates mini Snakes positions
+ *******************************/
 void updateSpecialAction() {
   for (Snake s : snake) {
     s.move();
@@ -203,8 +211,8 @@ void updateSpecialAction() {
 }
 
 /*******************************************************
-*translates multiplayersnakes to right position on screen
-*******************************************************/
+ *translates multiplayersnakes to right position on screen
+ *******************************************************/
 void translateMultiplayer(int Player, int count, int h) {
   if (NumberPlayer!= 1) {
     if (snake[Player].dead == true) {
@@ -220,16 +228,14 @@ void translateMultiplayer(int Player, int count, int h) {
   }
   pushMatrix();
   translate(-1*snake[Player].body.get(0).pos[0]+width/2, -1*snake[Player].body.get(0).pos[1]+height/2);    //centers map around Snake
-  //  translate(-mouseX+width/2, -mouseY+height/2);    //centers map around Snake
+  // translate(-mouseX+width/2, -mouseY+height/2);    //centers map around Snake
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*************************************************
-*Init Screen Scalings for multiplayer translations
-**************************************************/
+ *Init Screen Scalings for multiplayer translations
+ **************************************************/
 void setupMulti() {
-  /*****************
-   *Init Multiplayer
-   *****************/
   if (NumberPlayer >= 2) {
     ScaleScreenX = 0.5;
     if (NumberPlayer >=3)
@@ -237,31 +243,10 @@ void setupMulti() {
   }
 }
 
-/**************************************
-*Updates Rays of the snakes to see
-**************************************/
-void updateRays(int Player) {
-  if (snake[Player].ray[0] != null) {
-    int z = int(snake[Player].Angle*180/PI-2*snake[Player].upgrades.RayRadius*180/PI);
-    if (z<0)
-      z = maxRays-abs(z);
-    for (int k=1; k<4; k++) {              //Draws Snake Rays as a triangle
-      snake[Player].gridIDsRay = FindGrid(snake[Player].upgrades.RayDistance/k, Player);
-      SnakeGraphic.beginShape();
-      SnakeGraphic.fill(255, 70);
-      SnakeGraphic.noStroke();
-      SnakeGraphic.vertex(snake[Player].body.get(0).pos[0], snake[Player].body.get(0).pos[1]);
-      for (int i=0; i<maxRays; i++) {
-        snake[Player].ray[(i+z)%maxRays].update(snake[Player].body.get(0).pos[0], snake[Player].body.get(0).pos[1], snake[Player].Angle, k);
-      }
-      SnakeGraphic.endShape(CLOSE);
-    }
-  }
-}
-
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /********************************
-*Updates moving tiles on screen
-*********************************/
+ *Updates moving tiles on screen
+ *********************************/
 void UpdateMovingTiles() {
   for (int j = 0; j< movingtiles.length; j++) {
     if (movingtiles[j] == null)
@@ -297,4 +282,23 @@ void UpdateMovingTiles() {
     }
   }
   fillGridsBlocks();      //To change that only the moving Tiles are updated and not all tiles!
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+void shaderBlocks() {
+  if (shaderOn == true) {
+    int[] pointX = new int[lvl.count];
+    int[] pointY = new int[lvl.count];
+    int[] Glow = new int[4];
+    for (int i=0; i<lvl.count-1; i++) {
+      pointX[i] = blocks.get(i).pos[0]+15;
+      pointY[i] = blocks.get(i).pos[1]+15;
+      Glow[i] = blocks.get(i).fade;
+    }
+
+    myShader.set("pointX", pointX);
+    myShader.set("pointY", pointY);
+    myShader.set("size", blocks.get(0).size);
+    myShader.set("Glow", Glow);
+  }
 }

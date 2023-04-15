@@ -12,6 +12,18 @@ class Math{
     float Angle = atan2(y2-y,x2-x)+PI;
     return Angle;
   }
+   float Anglecalc(float x, float y, float x2, float y2) {    //Angle between mouse and Snake
+    float Angle = atan2(y2-y,x2-x)+PI;
+    return Angle;
+  }
+  float Anglecalc(int x, int y, float x2, float y2) {    //Angle between mouse and Snake
+    float Angle = atan2(y2-y,x2-x)+PI;
+    return Angle;
+  }
+  float Anglecalc(float x, float y, int x2, int y2) {    //Angle between mouse and Snake
+    float Angle = atan2(y2-y,x2-x)+PI;
+    return Angle;
+  }
  
   Boolean[] setvalBool(Boolean[] Arr){
     for(int i=0;i<Arr.length;i++)

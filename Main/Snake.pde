@@ -1,20 +1,23 @@
-/******************************************
+/****************************************** //<>// //<>//
  *Handles all about Snakes
  ******************************************/
 class Snake extends PrimalSnake {
   boolean missilealive = false;   //No Kaboom anymore
   Missiles missile;               //Kaboom!
   UpgradeHandler upgrades = new UpgradeHandler();
-  Ray[] ray = new Ray[maxRays];
+ // Ray[] ray = new Ray[maxRays];
+  FlashLight flash;
   miniSnake[] mini = new miniSnake[2];
   MissilePath [] path = new MissilePath [100];  //creates missilepath
-  Food nearestFood = new Food(0,0,-1000,-1000);
+  Food nearestFood = new Food(0, 0, -1000, -1000);
   ArrayList <Integer> gridIDsRay = new ArrayList <Integer>();          //RayIDList
   /***************************************
    *Constructor
    ***************************************/
-  Snake(boolean dummy, int id) {
+  Snake(boolean dummy, int _id) {
     NPC = dummy;
+    id = _id;
+    flash = new FlashLight(id);
     for (int i=0; i<=SLength; i++) {
       body.add(new SnakeBody());
     }
@@ -22,8 +25,10 @@ class Snake extends PrimalSnake {
     body.get(0).pos[1] = int(random(height));
     SnakeSetup(id);
   }
-  Snake(boolean dummy, int x, int y, int id) {
+  Snake(boolean dummy, int x, int y, int _id) {
     NPC = dummy;
+    id = _id;
+    flash = new FlashLight(id);
     for (int i=0; i<=SLength; i++) {
       body.add(new SnakeBody());
     }
@@ -32,27 +37,23 @@ class Snake extends PrimalSnake {
     SnakeSetup(id);
   }
 
+  //-------------------------------------------------------------------------------------------------------------------
   void SnakeSetup(int ids) {
     id = ids;
     upgrades.snakeID = id;
-    mini[0] = new miniSnake(1, id);
+    mini[0] = new miniSnake(1, id);        //ini mini snakes, even if upgrade for minis is not yet set
     mini[1] = new miniSnake(2, id);
-    initRays();
+   // initRays();
     missile = new Missiles();
     path[0] = new MissilePath();
   }
 
-  void initRays() {
-    for (int i=0; i<maxRays; i++) {
-      ray[i] = new Ray(body.get(0).pos[0], body.get(0).pos[1], i*PI/360, id);
-    }
-  }
 
   /***************************************
    *Tests if the Path is free
    ***************************************/
   @Override
-    void testPath() {
+    public void testPath() {
     testFood();
     testSnake();
     testBlocks();
@@ -60,45 +61,49 @@ class Snake extends PrimalSnake {
       testPortal();
     testWalls();
     testUpgrade();
-    GlowHandler();
+   // GlowHandler();
   }
 
   @Override
-    void testFood() {
+    public void testFood() {
     //TestFood
     float nearestDist =999;
 
     ArrayList <Integer> gridIDs = new ArrayList <Integer>();
-    gridIDs = FindGrid(GridSize,id);
+    gridIDs = FindGrid(GridSize, id);
 
-    for (int b = 0; b< gridIDs.size(); b++) {      //each grid test
-      for (int c = 0; c< grid.get(gridIDs.get(b)).food.size(); c++) {      //each food in each grid
-        int i = grid.get(gridIDs.get(b)).food.get(c);
-
-        // for (int i=0; i<food.size(); i++) {
-        float distance = 999;
-        distance = sqrt((food.get(i).posx-newpos[0])*(food.get(i).posx-newpos[0])+(food.get(i).posy-newpos[1])*(food.get(i).posy-newpos[1]));
-        if (distance < (food.get(i).size+size)/2) {
-          for (int k=0; k<food.get(i).value; k++)
-            body.add(new SnakeBody(body.get(body.size()-3).pos[0], body.get(body.size()-3).pos[1]));
-          if (food.get(i).value == 0) {     //Upgrade to be made
-            upgrades.PreUpdate();
-          } else {
-            SLength+=food.get(i).value;
-            maxFood+=food.get(i).value;
-          }
-          food.get(i).reset();
-          grid.get(gridIDs.get(b)).food.remove(c);
-          fillGridsFood();
-          DrawFood();
-        }
+    //searches for the nearest food
+    //eats it if its close enough
+    for (int g = 0; g< gridIDs.size(); g++) {      //each grid test
+      for (int f = 0; f< grid.get(gridIDs.get(g)).food.size(); f++) {      //each food in each grid
+        int foodID = grid.get(gridIDs.get(g)).food.get(f);
+        float distance = findFood(gridIDs, g, f, foodID);
         if (distance < nearestDist) {
           nearestDist = distance;
-          nearestFood = food.get(i);
+          nearestFood = food.get(foodID);
         }
       }
     }
-    // }
+  }
+
+  //-------------------------------------------------------------------------------------------------------------------
+  float findFood(ArrayList <Integer> gridIDs, int g, int f, int foodID) {
+    float distance = sqrt((food.get(foodID).posx-newpos[0])*(food.get(foodID).posx-newpos[0])+(food.get(foodID).posy-newpos[1])*(food.get(foodID).posy-newpos[1]));
+    if (distance >= (food.get(foodID).size+size)/2)
+      return distance;
+    for (int k=0; k<food.get(foodID).value; k++)
+      body.add(new SnakeBody(body.get(body.size()-3).pos[0], body.get(body.size()-3).pos[1]));
+    if (food.get(foodID).value == 0) {     //Upgrade to be made
+      upgrades.PreUpdate();
+    } else {
+      SLength+=food.get(foodID).value;
+      maxFood+=food.get(foodID).value;
+    }
+    food.get(foodID).reset();
+    grid.get(gridIDs.get(g)).food.remove(f);
+    fillGridsFood();
+    DrawFood();
+    return distance;
   }
 
   void testUpgrade() {
@@ -117,23 +122,26 @@ class Snake extends PrimalSnake {
   void testSnake() {
     //testSnake
     for (Snake s : snake) {
-      int maxdist = size/2;
-      if (s.speedSnake>1)
-        maxdist = size; //<>// //<>// //<>//
-      for(int b = 0; b<s.SLength;b++){
-        float distance =  sqrt((s.body.get(b).pos[0]-newpos[0])*(s.body.get(b).pos[0]-newpos[0])+(s.body.get(b).pos[1]-newpos[1])*(s.body.get(b).pos[1]-newpos[1]));
+      int maxdist = round(size*0.5);
+      for (int b = 0; b<s.SLength; b++) {
+        float distance = dist(s.body.get(b).pos[0], s.body.get(b).pos[1], newpos[0], newpos[1]);
+        // float distance =  sqrt((s.body.get(b).pos[0]-newpos[0])*(s.body.get(b).pos[0]-newpos[0])+(s.body.get(b).pos[1]-newpos[1])*(s.body.get(b).pos[1]-newpos[1]));
         if (distance < maxdist) {    //snek eats snek
           dead = true;
+          println("Snake bit snake");
           return;
-        }
-        else{                        //check how many bodyparts cannot contact snek  //TODO: auch teleporter und walls in minimum length einbeziehen
-          if(dist(s.body.get(b).pos[0],s.body.get(b).pos[1],s.body.get(b).pos[0],0) < distance){}  //upper wall
-          else if(dist(s.body.get(b).pos[0],s.body.get(b).pos[1],0,s.body.get(b).pos[1]) < distance){}  //left wall
-          else if(dist(s.body.get(b).pos[0],s.body.get(b).pos[1],width,s.body.get(b).pos[1]) < distance){}  //right wall
-          else if(dist(s.body.get(b).pos[0],s.body.get(b).pos[1],s.body.get(b).pos[0],height) < distance){}  //lower wall
-          else{
-            b+= floor(distance/size);
-          }
+        } else {                        //check how many bodyparts cannot contact snek  //TODO: auch teleporter und walls in minimum length einbeziehen
+          if (dist(s.body.get(b).pos[0], s.body.get(b).pos[1], s.body.get(b).pos[0], 0) < distance) {
+          }  //upper wall
+          else if (dist(s.body.get(b).pos[0], s.body.get(b).pos[1], 0, s.body.get(b).pos[1]) < distance) {
+          }  //left wall
+          else if (dist(s.body.get(b).pos[0], s.body.get(b).pos[1], width, s.body.get(b).pos[1]) < distance) {
+          }  //right wall
+          else if (dist(s.body.get(b).pos[0], s.body.get(b).pos[1], s.body.get(b).pos[0], height) < distance) {
+          }  //lower wall
+          //else{
+          //  b+= floor(distance/size);
+          //}
         }
       }
     }
@@ -142,7 +150,7 @@ class Snake extends PrimalSnake {
   void testBlocks() {
     //testBlocks
     ArrayList <Integer> gridIDs = new ArrayList <Integer>();
-    gridIDs = FindGrid(GridSize,id);
+    gridIDs = FindGrid(GridSize, id);
 
     for (int b = 0; b< gridIDs.size(); b++) {      //each grid test
       for (int c = 0; c< grid.get(gridIDs.get(b)).block.size(); c++) {      //each block in each grid
@@ -150,6 +158,7 @@ class Snake extends PrimalSnake {
         int i = grid.get(gridIDs.get(b)).block.get(c);
         if (newpos[0]+size/2>=blocks.get(i).pos[0] && newpos[0]-size/2 <= blocks.get(i).pos[0] + blocks.get(i).size && newpos[1]+size/2>=blocks.get(i).pos[1] && newpos[1] -size/2 <= blocks.get(i).pos[1] + blocks.get(i).size) {
           dead = true;
+          println("snake bit block #"+i+"  x:"+blocks.get(i).pos[0]+" y:"+blocks.get(i).pos[1]);
           return;
         }
         //}
@@ -159,7 +168,7 @@ class Snake extends PrimalSnake {
 
   void testPortal() {
     //testPortal
-    if (portaltime > 20) {
+    if (portaltime > 3) {
       for (byte k=0; k<MaxPortals; k++) {
         float[] distance = new float[2];
         boolean teleported = false;
@@ -177,13 +186,13 @@ class Snake extends PrimalSnake {
         }
       }
     }
-    if (portaltime <=20)
+    if (portaltime <=3                      )
       portaltime ++;
   }
 
   void GlowHandler() {
     ArrayList <Integer> gridIDs = new ArrayList <Integer>();
-    gridIDs = FindGrid(upgrades.glow,id);
+    gridIDs = FindGrid(upgrades.glow, id);
     for (int i = 0; i<body.size(); i+=3) {
       for (int b = 0; b< gridIDs.size(); b++) {      //each grid test
         for (int c = 0; c< grid.get(gridIDs.get(b)).block.size(); c++) {      //each food in each grid
