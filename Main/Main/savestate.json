@@ -1,0 +1,28 @@
+[
+  {
+    "maxLevel": 200,
+    "maxFood": 7219
+  },
+  {
+    "Skin_9": false,
+    "Skin_8": false,
+    "Skin_7": false,
+    "Skin_6": false,
+    "Skin_5": true,
+    "Skin_4": false,
+    "Skin_3": true,
+    "Skin_2": false,
+    "Skin_1": false,
+    "Skin_0": true,
+    "SnakeColorSelected": 5
+  },
+  {
+    "upgradeProcessing": 0,
+    "FurtherSight": 0,
+    "maxRockets": 0,
+    "maxSpeed": 0,
+    "maxMiniSnakes": 0,
+    "MiniMovement": 0,
+    "BroaderSight": 0
+  }
+]
