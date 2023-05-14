@@ -2,8 +2,8 @@
 void ReverseBlocks(){
   ArrayList <Integer> dummyX = new ArrayList<Integer>();
   ArrayList <Integer> dummyY = new ArrayList<Integer>();
-  for (int i=0; i<width/scale+1; i++) {
-    for (int k=0; k<height/scale+1; k++) {
+  for (int i=0; i<World.x/scale; i++) {
+    for (int k=0; k<World.y/scale; k++) {
       boolean exists = false;
       for (int j=0; j<blocksy.size(); j++) {
         if ( round((i)*scale) == blocksx.get(j) && round((k)*scale) == blocksy.get(j)) {
@@ -44,9 +44,9 @@ void addBlock() {
 
 void drawBlock(){
   for (int i=0; i<blocksx.size(); i++) {
-    noLines.rect(blocksx.get(i), blocksy.get(i), scale, scale);
+    noLines.rect(blocksx.get(i)*scaleFact, blocksy.get(i)*scaleFact, scale*scaleFact, scale*scaleFact);
     noLines.fill(#00FFFF);
-    noLines.circle(snake[0], snake[1], 10);
+    noLines.circle(snake[0]*scaleFact, snake[1]*scaleFact, 10);
     noLines.fill(#FFFFFF);
   }
 }

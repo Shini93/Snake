@@ -6,5 +6,5 @@ void createImage(){
   if(lvlloaded == true){
     level = chosenLevel;
   }
-  noLines.save("../../Main/data/lvlpics/lvl"+level+".png");
+  noLines.save("../../Main/Main/data/lvlpics/lvl"+level+".png");
 }
