@@ -1,0 +1,22 @@
+Food_reset:
+	nicht alle futterdurchgehen, herausfinden in welchem grid es landet und dort testen
+Block reset:
+	nicht alle blöcke durchgehen, herausfinden in welchem grid es landet und dort testen
+verbessere GridSystem
+
+mehrere racketen möglich machen
+	durch upgrades schnellere racketen
+	"" "" 	       mehr Racketen
+	"" ""	       Kreisende Racketen um Schlange?
+	"" ""	       Geschwindigkeit sähmiger machen
+
+Überlegen wie das spiel beendet werden kann
+neue Level einfügen
+neue skins
+Kopfteile zu kaufen
+Upgrades kaufbar?
+
+PrimalSnake TestFood:
+	Gridsystem!
+Snakes:
+	UpdateSnakeBody optimieren

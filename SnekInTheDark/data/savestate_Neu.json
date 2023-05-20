@@ -1,0 +1,28 @@
+{
+  "progress": {
+    "maxLevel": 4,
+    "maxFood": 135
+  },
+  "skins": {
+    "Skin_9": false,
+    "Skin_8": false,
+    "Skin_7": false,
+    "Skin_6": false,
+    "Skin_5": false,
+    "Skin_4": false,
+    "Skin_3": false,
+    "Skin_2": false,
+    "Skin_1": false,
+    "Skin_0": false,
+    "SnakeColorSelected": 0
+  },
+  "upgrades": {
+    "upgradeProcessing": 0,
+    "FurtherSight": 0,
+    "maxRockets": 0,
+    "maxSpeed": 0,
+    "maxMiniSnakes": 0,
+    "MiniMovement": 0,
+    "BroaderSight": 0
+  }
+}
